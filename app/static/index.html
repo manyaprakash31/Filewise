@@ -133,28 +133,52 @@
       cursor: not-allowed;
     }
 
+    .btn-secondary {
+      background-color: var(--tag-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      width: auto;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--accent-subtle);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     .doc-list {
       list-style: none;
       font-size: 0.825rem;
-      max-height: 240px;
+      max-height: 260px;
       overflow-y: auto;
     }
 
     .doc-item {
-      padding: 0.5rem;
+      padding: 0.6rem 0.5rem;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background 0.1s ease;
     }
 
     .doc-item:last-child {
       border-bottom: none;
     }
 
+    .doc-item.active {
+      background: var(--accent-subtle);
+      border-radius: 4px;
+    }
+
     .doc-meta {
       color: var(--text-muted);
       font-size: 0.75rem;
+      margin-top: 0.15rem;
     }
 
     .textarea-query {
@@ -268,6 +292,95 @@
       color: #cf222e;
       display: block;
     }
+
+    /* Modal dialog for viewing extracted chunks & document content */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(27, 31, 36, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+    }
+
+    .modal-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .chunk-block {
+      background: var(--tag-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .chunk-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 0.3rem;
+    }
+
+    .chunk-text {
+      white-space: pre-wrap;
+      color: var(--text-main);
+      font-family: inherit;
+    }
   </style>
 </head>
 <body>
@@ -323,6 +436,22 @@
     </div>
   </div>
 
+  <!-- Document Chunks & Extracted Text Modal -->
+  <div id="docModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-container" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div id="modalDocTitle" class="modal-title">Document Content</div>
+          <div id="modalDocMeta" class="doc-meta">Extracted Text & Indexed Chunks</div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modalDocBody" class="modal-body">
+        <div class="empty-state">Loading document chunks...</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let selectedFiles = [];
 
@@ -355,12 +484,64 @@
                 <strong>${d.filename}</strong>
                 <div class="doc-meta">${d.chunk_count} chunk(s)${d.page_count ? ' • ' + d.page_count + ' page(s)' : ''}</div>
               </div>
+              <button class="btn-secondary" onclick="viewDocument('${encodeURIComponent(d.filename)}')">View Content</button>
             </li>
           `).join('');
         }
       } catch (e) {
         console.error("Failed to load documents", e);
       }
+    }
+
+    async function viewDocument(encodedFilename) {
+      const filename = decodeURIComponent(encodedFilename);
+      const modal = document.getElementById('docModal');
+      const title = document.getElementById('modalDocTitle');
+      const meta = document.getElementById('modalDocMeta');
+      const body = document.getElementById('modalDocBody');
+
+      title.textContent = filename;
+      meta.textContent = 'Fetching indexed chunks...';
+      body.innerHTML = '<div class="empty-state">Loading extracted document chunks...</div>';
+      modal.classList.add('open');
+
+      try {
+        const res = await fetch(`/api/v1/documents/${encodeURIComponent(filename)}`);
+        if (!res.ok) {
+          body.innerHTML = `<div class="empty-state" style="color: #cf222e;">Failed to load content for ${filename}</div>`;
+          return;
+        }
+
+        const data = await res.json();
+        meta.textContent = `${data.chunk_count} chunk(s) indexed${data.page_count ? ' across ' + data.page_count + ' page(s)' : ''}`;
+
+        if (!data.chunks || data.chunks.length === 0) {
+          body.innerHTML = '<div class="empty-state">No extracted chunks found for this document.</div>';
+          return;
+        }
+
+        body.innerHTML = data.chunks.map((c, idx) => `
+          <div class="chunk-block">
+            <div class="chunk-header">
+              <span>Chunk #${idx + 1} (${c.chunk_id})</span>
+              <span>${c.page_number ? 'Page ' + c.page_number : 'Full Document'}</span>
+            </div>
+            <div class="chunk-text">${escapeHtml(c.text)}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        body.innerHTML = `<div class="empty-state" style="color: #cf222e;">Error: ${err.message}</div>`;
+      }
+    }
+
+    function closeModal(e) {
+      document.getElementById('docModal').classList.remove('open');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     function handleFileSelected(e) {
@@ -461,7 +642,7 @@
                     <span>${s.document}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
                     <span>${s.chunk_id ? '#' + s.chunk_id : ''}</span>
                   </div>
-                  <div class="source-excerpt">"${s.excerpt}"</div>
+                  <div class="source-excerpt">"${escapeHtml(s.excerpt)}"</div>
                 </div>
               `).join('')}
             </div>
@@ -471,7 +652,7 @@
         area.innerHTML = `
           <div>
             <span class="status-badge ${badgeClass}">${badgeText}</span>
-            <div class="answer-text">${data.answer}</div>
+            <div class="answer-text">${escapeHtml(data.answer)}</div>
             ${sourcesHtml}
           </div>
         `;

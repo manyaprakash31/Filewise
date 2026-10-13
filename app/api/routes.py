@@ -8,6 +8,7 @@ from app.models.schemas import (
     AskRequest,
     AskResponse,
     BatchIngestResponse,
+    DocumentContentResponse,
     DocumentListResponse,
     HealthResponse,
     IngestResponse,
@@ -233,6 +234,34 @@ async def list_documents(request: Request) -> DocumentListResponse:
     vector_store = request.app.state.vector_store
     docs = vector_store.list_documents()
     return DocumentListResponse(total_documents=len(docs), documents=docs)
+
+
+@router.get(
+    "/documents/{filename}",
+    response_model=DocumentContentResponse,
+    summary="Get Extracted Document Content & Chunks",
+)
+async def get_document_content(filename: str, request: Request) -> DocumentContentResponse:
+    """Return all indexed chunks and extracted text for a specific document."""
+    sanitized_name = DocumentLoader.sanitize_filename(filename)
+    vector_store = request.app.state.vector_store
+
+    chunks = vector_store.get_document_chunks(sanitized_name)
+    if not chunks:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{sanitized_name}' not found in indexed documents.",
+        )
+
+    pages = {c.page_number for c in chunks if c.page_number is not None}
+    page_count = len(pages) if pages else None
+
+    return DocumentContentResponse(
+        filename=sanitized_name,
+        chunk_count=len(chunks),
+        page_count=page_count,
+        chunks=chunks,
+    )
 
 
 @router.post("/ask", response_model=AskResponse, summary="Ask Question Grounded in Documents")

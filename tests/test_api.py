@@ -99,3 +99,25 @@ def test_end_to_end_ingest_and_ask(client):
     assert len(data["sources"]) > 0
     assert data["sources"][0]["document"] == "stipend.txt"
     assert "$1200" in data["sources"][0]["excerpt"]
+
+
+def test_get_document_content(client):
+    # Ingest document
+    content = b"Content for testing chunk viewing."
+    client.post(
+        "/documents/ingest",
+        files={"file": ("view_test.txt", io.BytesIO(content), "text/plain")},
+    )
+
+    # Fetch document content
+    res = client.get("/documents/view_test.txt")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["filename"] == "view_test.txt"
+    assert data["chunk_count"] > 0
+    assert len(data["chunks"]) > 0
+    assert "Content for testing chunk viewing" in data["chunks"][0]["text"]
+
+    # Non-existent document
+    res_404 = client.get("/documents/non_existent.txt")
+    assert res_404.status_code == 404

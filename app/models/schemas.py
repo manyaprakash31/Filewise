@@ -56,6 +56,15 @@ class DocumentListResponse(BaseModel):
     documents: List[IndexedDocument]
 
 
+class DocumentContentResponse(BaseModel):
+    """Detailed content response containing indexed chunks for a document."""
+
+    filename: str
+    chunk_count: int
+    page_count: Optional[int] = None
+    chunks: List[DocumentChunk]
+
+
 class AskRequest(BaseModel):
     """Question answering query request."""
 

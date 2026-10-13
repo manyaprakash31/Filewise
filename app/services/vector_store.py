@@ -123,6 +123,10 @@ class VectorStore:
             )
         return sorted(summary, key=lambda d: d.filename)
 
+    def get_document_chunks(self, filename: str) -> List[DocumentChunk]:
+        """Return all indexed chunks belonging to the specified document filename."""
+        return [c for c in self.chunks if c.document_name == filename]
+
     def total_chunks(self) -> int:
         """Total number of indexed chunks."""
         return len(self.chunks)
