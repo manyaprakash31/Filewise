@@ -1,0 +1,146 @@
+[
+  {
+    "id": "q01",
+    "type": "single_document",
+    "question": "What is the one-time home office equipment stipend for remote employees?",
+    "expected_answerable": true,
+    "expected_sources": ["company_policy.md"],
+    "keywords": ["$1,200", "1200", "stipend"],
+    "description": "Checks single document fact retrieval from markdown company policy."
+  },
+  {
+    "id": "q02",
+    "type": "single_document",
+    "question": "What are the core collaboration hours for remote employees?",
+    "expected_answerable": true,
+    "expected_sources": ["company_policy.md"],
+    "keywords": ["10:00 AM", "3:00 PM", "Eastern Time"],
+    "description": "Checks work hour policy extraction."
+  },
+  {
+    "id": "q03",
+    "type": "single_document",
+    "question": "What is the target release date for Project Aegis?",
+    "expected_answerable": true,
+    "expected_sources": ["project_specification.txt"],
+    "keywords": ["November 15, 2026"],
+    "description": "Checks exact date extraction from project specification."
+  },
+  {
+    "id": "q04",
+    "type": "single_document",
+    "question": "What is the Recovery Time Objective (RTO) for Project Aegis?",
+    "expected_answerable": true,
+    "expected_sources": ["project_specification.txt"],
+    "keywords": ["15 minutes", "RTO"],
+    "description": "Checks SLA metrics extraction."
+  },
+  {
+    "id": "q05",
+    "type": "single_document",
+    "question": "How many days of annual paid vacation do full-time employees accrue?",
+    "expected_answerable": true,
+    "expected_sources": ["employee_handbook.pdf"],
+    "keywords": ["20 days", "vacation"],
+    "description": "Checks PDF extraction and page-based retrieval."
+  },
+  {
+    "id": "q06",
+    "type": "single_document",
+    "question": "What is the annual education stipend for employees?",
+    "expected_answerable": true,
+    "expected_sources": ["employee_handbook.pdf"],
+    "keywords": ["$2,500", "2500", "education", "learning"],
+    "description": "Checks Chapter 2 learning stipend retrieval from PDF."
+  },
+  {
+    "id": "q07",
+    "type": "multi_document",
+    "question": "What financial stipends or allowances are provided for home office equipment and professional learning?",
+    "expected_answerable": true,
+    "expected_sources": ["company_policy.md", "employee_handbook.pdf"],
+    "keywords": ["$1,200", "$2,500"],
+    "description": "Requires synthesizing information across company_policy.md and employee_handbook.pdf."
+  },
+  {
+    "id": "q08",
+    "type": "multi_document",
+    "question": "What security requirements apply to remote network access and internal Project Aegis communications?",
+    "expected_answerable": true,
+    "expected_sources": ["company_policy.md", "project_specification.txt"],
+    "keywords": ["VPN", "mTLS", "multi-factor"],
+    "description": "Requires combining VPN policy from company_policy.md and mTLS from project_specification.txt."
+  },
+  {
+    "id": "q09",
+    "type": "multi_document",
+    "question": "What are the submission deadlines for internet reimbursement expenses versus travel expense receipts?",
+    "expected_answerable": true,
+    "expected_sources": ["company_policy.md", "employee_handbook.pdf"],
+    "keywords": ["5th business day", "10 business days"],
+    "description": "Requires combining reimbursement deadlines from policy markdown and handbook PDF."
+  },
+  {
+    "id": "q10",
+    "type": "multi_document",
+    "question": "What database systems are used for Project Aegis and what is the company 401(k) retirement plan match?",
+    "expected_answerable": true,
+    "expected_sources": ["project_specification.txt", "employee_handbook.pdf"],
+    "keywords": ["PostgreSQL", "ClickHouse", "5%"],
+    "description": "Requires combining technical stack data and HR retirement policy."
+  },
+  {
+    "id": "q11",
+    "type": "unanswerable",
+    "question": "What is the annual revenue of Meridian Technologies for 2025?",
+    "expected_answerable": false,
+    "expected_sources": [],
+    "keywords": ["sufficient information in the uploaded documents"],
+    "description": "Plausible corporate question with no evidence in the uploaded documents."
+  },
+  {
+    "id": "q12",
+    "type": "unanswerable",
+    "question": "Who is the Chief Financial Officer (CFO) of the company?",
+    "expected_answerable": false,
+    "expected_sources": [],
+    "keywords": ["sufficient information in the uploaded documents"],
+    "description": "Executive leadership name not present in the documents."
+  },
+  {
+    "id": "q13",
+    "type": "unanswerable",
+    "question": "What programming language is used for the frontend mobile application of Project Aegis?",
+    "expected_answerable": false,
+    "expected_sources": [],
+    "keywords": ["sufficient information in the uploaded documents"],
+    "description": "Mobile frontend technology is nowhere mentioned."
+  },
+  {
+    "id": "q14",
+    "type": "irrelevant_query",
+    "question": "How far is the Moon from planet Mars in kilometers?",
+    "expected_answerable": false,
+    "expected_sources": [],
+    "keywords": ["sufficient information in the uploaded documents"],
+    "description": "Completely unrelated query testing threshold filtering and abstention."
+  },
+  {
+    "id": "q15",
+    "type": "partial_or_missing",
+    "question": "What is the per diem meal allowance when traveling, and what is the allowance for laundry expenses?",
+    "expected_answerable": true,
+    "expected_sources": ["employee_handbook.pdf"],
+    "keywords": ["$85", "laundry"],
+    "description": "Tests handling partially supported queries where meal is $85 and laundry is missing/unspecified."
+  },
+  {
+    "id": "q16",
+    "type": "single_document",
+    "question": "How many weeks of paid parental leave do primary caregivers receive?",
+    "expected_answerable": true,
+    "expected_sources": ["employee_handbook.pdf"],
+    "keywords": ["16 weeks", "parental leave"],
+    "description": "Tests caregiver parental leave retrieval."
+  }
+]

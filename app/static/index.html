@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filewise — Evidence-Based Knowledge Assistant</title>
+  <style>
+    :root {
+      --bg-color: #fbfbf9;
+      --card-bg: #ffffff;
+      --text-main: #24292f;
+      --text-muted: #57606a;
+      --border-color: #e1e4e8;
+      --accent: #0969da;
+      --accent-hover: #0757b6;
+      --accent-subtle: #f0f6ff;
+      --success-badge: #1f883d;
+      --tag-bg: #f6f8fa;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .system-badge {
+      font-size: 0.75rem;
+      background: var(--tag-bg);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-input-wrapper {
+      border: 1.5px dashed var(--border-color);
+      border-radius: 6px;
+      padding: 1.25rem;
+      text-align: center;
+      background: var(--tag-bg);
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+    }
+
+    .file-input-wrapper:hover {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      background-color: var(--accent);
+      color: #fff;
+      border: 1px solid transparent;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .doc-list {
+      list-style: none;
+      font-size: 0.825rem;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .doc-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .doc-item:last-child {
+      border-bottom: none;
+    }
+
+    .doc-meta {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .textarea-query {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      resize: vertical;
+      min-height: 80px;
+      margin-bottom: 0.75rem;
+    }
+
+    .textarea-query:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-subtle);
+    }
+
+    .answer-panel {
+      min-height: 200px;
+    }
+
+    .answer-text {
+      font-size: 0.925rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    .status-badge.answerable {
+      background: #dafbe1;
+      color: #1a7f37;
+    }
+
+    .status-badge.unavailable {
+      background: #ffebe9;
+      color: #cf222e;
+    }
+
+    .sources-section {
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .sources-title {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .source-card {
+      background: var(--tag-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.825rem;
+    }
+
+    .source-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .source-excerpt {
+      color: var(--text-main);
+      font-style: italic;
+    }
+
+    .empty-state {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .notification {
+      font-size: 0.8rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .notification.success {
+      background: #dafbe1;
+      color: #1a7f37;
+      display: block;
+    }
+
+    .notification.error {
+      background: #ffebe9;
+      color: #cf222e;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="brand-title">Filewise</div>
+        <div class="brand-subtitle">Evidence-Based Knowledge Assistant</div>
+      </div>
+      <div id="statusBadge" class="system-badge">Connecting...</div>
+    </header>
+
+    <div class="grid">
+      <!-- Left Column: Document Management -->
+      <div>
+        <div class="card">
+          <div class="card-title">Upload Documents</div>
+          <div class="file-input-wrapper" onclick="document.getElementById('fileInput').click()">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Click to select PDF, TXT, or MD</span>
+            <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md,.markdown" style="display: none;" onchange="handleFileSelected(event)">
+          </div>
+          <div id="selectedFilesLabel" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">No files chosen</div>
+          <button id="uploadBtn" class="btn" onclick="uploadFiles()" disabled>Ingest Documents</button>
+          <div id="uploadNotification" class="notification"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Indexed Documents</span>
+            <span id="docCountBadge" class="system-badge">0</span>
+          </div>
+          <ul id="docList" class="doc-list">
+            <li class="empty-state">No documents indexed yet.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right Column: Ask & Grounded Answers -->
+      <div>
+        <div class="card">
+          <div class="card-title">Ask Question</div>
+          <textarea id="questionInput" class="textarea-query" placeholder="Ask a question grounded in the uploaded documents..."></textarea>
+          <button id="askBtn" class="btn" onclick="submitQuestion()">Ask Assistant</button>
+        </div>
+
+        <div class="card answer-panel">
+          <div class="card-title">Grounded Answer</div>
+          <div id="answerArea">
+            <div class="empty-state">Submit a question to see evidence-grounded answers with source citations.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedFiles = [];
+
+    async function loadHealth() {
+      try {
+        const res = await fetch('/api/v1/health');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('statusBadge').textContent = `Ready • LLM: ${data.llm_provider}`;
+        }
+      } catch (e) {
+        document.getElementById('statusBadge').textContent = 'Server Offline';
+      }
+    }
+
+    async function refreshDocuments() {
+      try {
+        const res = await fetch('/api/v1/documents');
+        if (res.ok) {
+          const data = await res.json();
+          const list = document.getElementById('docList');
+          document.getElementById('docCountBadge').textContent = data.total_documents;
+          if (data.documents.length === 0) {
+            list.innerHTML = '<li class="empty-state">No documents indexed yet.</li>';
+            return;
+          }
+          list.innerHTML = data.documents.map(d => `
+            <li class="doc-item">
+              <div>
+                <strong>${d.filename}</strong>
+                <div class="doc-meta">${d.chunk_count} chunk(s)${d.page_count ? ' • ' + d.page_count + ' page(s)' : ''}</div>
+              </div>
+            </li>
+          `).join('');
+        }
+      } catch (e) {
+        console.error("Failed to load documents", e);
+      }
+    }
+
+    function handleFileSelected(e) {
+      selectedFiles = Array.from(e.target.files);
+      const label = document.getElementById('selectedFilesLabel');
+      const btn = document.getElementById('uploadBtn');
+      if (selectedFiles.length > 0) {
+        label.textContent = `${selectedFiles.length} file(s) selected: ` + selectedFiles.map(f => f.name).join(', ');
+        btn.disabled = false;
+      } else {
+        label.textContent = 'No files chosen';
+        btn.disabled = true;
+      }
+    }
+
+    async function uploadFiles() {
+      if (selectedFiles.length === 0) return;
+      const btn = document.getElementById('uploadBtn');
+      const notif = document.getElementById('uploadNotification');
+      btn.disabled = true;
+      btn.textContent = 'Ingesting...';
+      notif.className = 'notification';
+
+      try {
+        let endpoint = '/api/v1/documents/ingest';
+        let body;
+        if (selectedFiles.length === 1) {
+          body = new FormData();
+          body.append('file', selectedFiles[0]);
+        } else {
+          endpoint = '/api/v1/documents/ingest/batch';
+          body = new FormData();
+          for (const f of selectedFiles) {
+            body.append('files', f);
+          }
+        }
+
+        const res = await fetch(endpoint, { method: 'POST', body });
+        const data = await res.json();
+
+        if (res.ok) {
+          notif.className = 'notification success';
+          notif.textContent = selectedFiles.length === 1 
+            ? `${data.filename}: ${data.message}` 
+            : `Indexed ${data.successful} of ${data.total_files} file(s).`;
+          selectedFiles = [];
+          document.getElementById('fileInput').value = '';
+          document.getElementById('selectedFilesLabel').textContent = 'No files chosen';
+          await refreshDocuments();
+        } else {
+          notif.className = 'notification error';
+          notif.textContent = data.detail || 'Upload failed.';
+        }
+      } catch (err) {
+        notif.className = 'notification error';
+        notif.textContent = 'Upload error: ' + err.message;
+      } finally {
+        btn.textContent = 'Ingest Documents';
+        btn.disabled = selectedFiles.length === 0;
+      }
+    }
+
+    async function submitQuestion() {
+      const qInput = document.getElementById('questionInput');
+      const q = qInput.value.trim();
+      if (!q) return;
+
+      const btn = document.getElementById('askBtn');
+      const area = document.getElementById('answerArea');
+      btn.disabled = true;
+      btn.textContent = 'Searching evidence...';
+      area.innerHTML = '<div class="empty-state">Retrieving relevant chunks and verifying evidence...</div>';
+
+      try {
+        const res = await fetch('/api/v1/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          area.innerHTML = `<div class="status-badge unavailable">Error</div><div class="answer-text">${data.detail || 'Failed to retrieve answer.'}</div>`;
+          return;
+        }
+
+        const badgeClass = data.answerable ? 'answerable' : 'unavailable';
+        const badgeText = data.answerable ? 'Grounded in Evidence' : 'Information Unavailable';
+
+        let sourcesHtml = '';
+        if (data.sources && data.sources.length > 0) {
+          sourcesHtml = `
+            <div class="sources-section">
+              <div class="sources-title">Supporting Sources & Excerpts</div>
+              ${data.sources.map(s => `
+                <div class="source-card">
+                  <div class="source-header">
+                    <span>${s.document}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
+                    <span>${s.chunk_id ? '#' + s.chunk_id : ''}</span>
+                  </div>
+                  <div class="source-excerpt">"${s.excerpt}"</div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        area.innerHTML = `
+          <div>
+            <span class="status-badge ${badgeClass}">${badgeText}</span>
+            <div class="answer-text">${data.answer}</div>
+            ${sourcesHtml}
+          </div>
+        `;
+      } catch (e) {
+        area.innerHTML = `<div class="status-badge unavailable">Network Error</div><div class="answer-text">${e.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Ask Assistant';
+      }
+    }
+
+    // Initialize
+    loadHealth();
+    refreshDocuments();
+  </script>
+</body>
+</html>

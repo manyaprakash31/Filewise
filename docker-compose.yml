@@ -1,0 +1,27 @@
+services:
+  filewise:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: filewise-api
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-mock}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL_NAME=${LLM_MODEL_NAME:-gemini-2.5-flash}
+      - EMBEDDING_MODEL_NAME=all-MiniLM-L6-v2
+      - VECTOR_STORE_DIR=/app/data/vector_store
+      - CHUNK_SIZE=500
+      - CHUNK_OVERLAP=100
+      - RETRIEVAL_TOP_K=4
+      - RELEVANCE_THRESHOLD=0.35
+      - MAX_UPLOAD_SIZE_MB=15
+    volumes:
+      - vector_store_data:/app/data/vector_store
+      - ./data/sample_documents:/app/data/sample_documents:ro
+    restart: unless-stopped
+
+volumes:
+  vector_store_data:
+    driver: local

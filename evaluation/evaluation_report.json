@@ -1,0 +1,304 @@
+{
+  "summary": {
+    "total_questions": 16,
+    "total_answerable": 12,
+    "total_unanswerable": 4,
+    "overall_accuracy_percent": 100.0,
+    "answerable_accuracy_percent": 100.0,
+    "abstention_accuracy_percent": 100.0,
+    "source_coverage_percent": 100.0,
+    "grounded_keyword_accuracy_percent": 93.75
+  },
+  "results": [
+    {
+      "id": "q01",
+      "type": "single_document",
+      "question": "What is the one-time home office equipment stipend for remote employees?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 36.18,
+      "expected_sources": [
+        "company_policy.md"
+      ],
+      "actual_sources": [
+        "company_policy.md",
+        "company_policy.md"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "## Section 2: Home Office Equipment Allowance\nFull-time remote employees receive a one-time home office equipment stipend of $1,200 upon hir..."
+    },
+    {
+      "id": "q02",
+      "type": "single_document",
+      "question": "What are the core collaboration hours for remote employees?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 33.79,
+      "expected_sources": [
+        "company_policy.md"
+      ],
+      "actual_sources": [
+        "company_policy.md",
+        "company_policy.md",
+        "employee_handbook.pdf"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "# Meridian Technologies - Remote Work and Equipment Policy\nDocument ID: POL-2026-REM\nEffective Date: March 1, 2026\nVersion: 3.2 ## Section 1..."
+    },
+    {
+      "id": "q03",
+      "type": "single_document",
+      "question": "What is the target release date for Project Aegis?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 36.1,
+      "expected_sources": [
+        "project_specification.txt"
+      ],
+      "actual_sources": [
+        "project_specification.txt",
+        "project_specification.txt"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "PROJECT SPECIFICATION: PROJECT AEGIS\nAuthor: Architecture Review Board (Lead: Marcus Vance)\nDate: January 15, 2026\nStatus: Approved 1. The p..."
+    },
+    {
+      "id": "q04",
+      "type": "single_document",
+      "question": "What is the Recovery Time Objective (RTO) for Project Aegis?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 37.69,
+      "expected_sources": [
+        "project_specification.txt"
+      ],
+      "actual_sources": [
+        "project_specification.txt",
+        "project_specification.txt"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "In the event of an unplanned regional outage, the Recovery Time Objective (RTO) is 15 minutes, and the Recovery Point Objective (RPO) is les..."
+    },
+    {
+      "id": "q05",
+      "type": "single_document",
+      "question": "How many days of annual paid vacation do full-time employees accrue?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 33.9,
+      "expected_sources": [
+        "employee_handbook.pdf"
+      ],
+      "actual_sources": [
+        "employee_handbook.pdf",
+        "employee_handbook.pdf",
+        "employee_handbook.pdf"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "Meridian Technologies - Employee Handbook\nChapter 1: Paid Time Off (PTO) and Leaves\nAnnual PTO Accrual: Full-time employees accrue 20 days o..."
+    },
+    {
+      "id": "q06",
+      "type": "single_document",
+      "question": "What is the annual education stipend for employees?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 32.39,
+      "expected_sources": [
+        "employee_handbook.pdf"
+      ],
+      "actual_sources": [
+        "employee_handbook.pdf",
+        "company_policy.md"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "Chapter 2: Learning & Professional Development\nAnnual Education Stipend: Employees are allotted an annual budget of ,500 for job-related lea..."
+    },
+    {
+      "id": "q07",
+      "type": "multi_document",
+      "question": "What financial stipends or allowances are provided for home office equipment and professional learning?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 34.35,
+      "expected_sources": [
+        "company_policy.md",
+        "employee_handbook.pdf"
+      ],
+      "actual_sources": [
+        "employee_handbook.pdf",
+        "company_policy.md"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "## Section 2: Home Office Equipment Allowance\nFull-time remote employees receive a one-time home office equipment stipend of $1,200 upon hir..."
+    },
+    {
+      "id": "q08",
+      "type": "multi_document",
+      "question": "What security requirements apply to remote network access and internal Project Aegis communications?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 32.92,
+      "expected_sources": [
+        "company_policy.md",
+        "project_specification.txt"
+      ],
+      "actual_sources": [
+        "company_policy.md",
+        "project_specification.txt"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "## Section 3: Data Security and Network Access\nRemote team members must connect to the Meridian Virtual Private Network (VPN) with multi-fac..."
+    },
+    {
+      "id": "q09",
+      "type": "multi_document",
+      "question": "What are the submission deadlines for internet reimbursement expenses versus travel expense receipts?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 39.51,
+      "expected_sources": [
+        "company_policy.md",
+        "employee_handbook.pdf"
+      ],
+      "actual_sources": [
+        "company_policy.md",
+        "employee_handbook.pdf"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "Expense Submission: Travel expense receipts must be uploaded within 10 business days of trip conclusion. ## Section 4: Expense Reimbursement..."
+    },
+    {
+      "id": "q10",
+      "type": "multi_document",
+      "question": "What database systems are used for Project Aegis and what is the company 401(k) retirement plan match?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 37.79,
+      "expected_sources": [
+        "project_specification.txt",
+        "employee_handbook.pdf"
+      ],
+      "actual_sources": [
+        "project_specification.txt",
+        "employee_handbook.pdf",
+        "project_specification.txt"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "Retirement Plan: The company provides a 401(k) retirement plan with an immediate 5% employer salary match."
+    },
+    {
+      "id": "q11",
+      "type": "unanswerable",
+      "question": "What is the annual revenue of Meridian Technologies for 2025?",
+      "expected_answerable": false,
+      "actual_answerable": false,
+      "status": "PASS (Correctly Abstained)",
+      "latency_ms": 34.26,
+      "expected_sources": [],
+      "actual_sources": [],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "I could not find sufficient information in the uploaded documents to answer this question."
+    },
+    {
+      "id": "q12",
+      "type": "unanswerable",
+      "question": "Who is the Chief Financial Officer (CFO) of the company?",
+      "expected_answerable": false,
+      "actual_answerable": false,
+      "status": "PASS (Correctly Abstained)",
+      "latency_ms": 31.29,
+      "expected_sources": [],
+      "actual_sources": [],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "I could not find sufficient information in the uploaded documents to answer this question."
+    },
+    {
+      "id": "q13",
+      "type": "unanswerable",
+      "question": "What programming language is used for the frontend mobile application of Project Aegis?",
+      "expected_answerable": false,
+      "actual_answerable": false,
+      "status": "PASS (Correctly Abstained)",
+      "latency_ms": 32.02,
+      "expected_sources": [],
+      "actual_sources": [],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "I could not find sufficient information in the uploaded documents to answer this question."
+    },
+    {
+      "id": "q14",
+      "type": "irrelevant_query",
+      "question": "How far is the Moon from planet Mars in kilometers?",
+      "expected_answerable": false,
+      "actual_answerable": false,
+      "status": "PASS (Correctly Abstained)",
+      "latency_ms": 26.55,
+      "expected_sources": [],
+      "actual_sources": [],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "I could not find sufficient information in the uploaded documents to answer this question."
+    },
+    {
+      "id": "q15",
+      "type": "partial_or_missing",
+      "question": "What is the per diem meal allowance when traveling, and what is the allowance for laundry expenses?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 26.82,
+      "expected_sources": [
+        "employee_handbook.pdf"
+      ],
+      "actual_sources": [
+        "employee_handbook.pdf"
+      ],
+      "source_covered": true,
+      "keyword_hit": false,
+      "answer_preview": "Chapter 3: Business Travel and Incidentals\nPer Diem Meal Allowance: When traveling on approved company business, the per diem meal allowance..."
+    },
+    {
+      "id": "q16",
+      "type": "single_document",
+      "question": "How many weeks of paid parental leave do primary caregivers receive?",
+      "expected_answerable": true,
+      "actual_answerable": true,
+      "status": "PASS (Answered)",
+      "latency_ms": 24.23,
+      "expected_sources": [
+        "employee_handbook.pdf"
+      ],
+      "actual_sources": [
+        "employee_handbook.pdf",
+        "employee_handbook.pdf"
+      ],
+      "source_covered": true,
+      "keyword_hit": true,
+      "answer_preview": "Parental Leave: Primary caregivers receive 16 weeks of fully paid parental leave following birth or adoption. Secondary caregivers receive 6..."
+    }
+  ]
+}
