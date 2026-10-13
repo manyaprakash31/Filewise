@@ -69,6 +69,9 @@ class AskRequest(BaseModel):
     """Question answering query request."""
 
     question: str = Field(..., min_length=2, max_length=1000, description="The user's query question")
+    document_name: Optional[str] = Field(
+        None, description="Optional target document to restrict retrieval to a specific document workspace"
+    )
     top_k: Optional[int] = Field(None, ge=1, le=20, description="Optional override for top_k retrieval")
     relevance_threshold: Optional[float] = Field(
         None, ge=0.0, le=1.0, description="Optional override for similarity score threshold"

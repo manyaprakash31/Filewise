@@ -1,7 +1,7 @@
 """Dedicated semantic retrieval service."""
 
 import logging
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from app.models.schemas import DocumentChunk
 from app.services.embeddings import EmbeddingService
 from app.services.vector_store import VectorStore
@@ -21,6 +21,7 @@ class RetrievalService:
         query: str,
         top_k: int = 4,
         relevance_threshold: float = 0.35,
+        document_name: Optional[str] = None,
     ) -> List[Tuple[DocumentChunk, float]]:
         """Retrieve the most relevant document chunks for a given query above the threshold.
 
@@ -44,6 +45,7 @@ class RetrievalService:
             query_embedding=query_embedding,
             top_k=top_k,
             relevance_threshold=relevance_threshold,
+            document_name=document_name,
         )
 
         logger.info(

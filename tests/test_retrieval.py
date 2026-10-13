@@ -99,3 +99,33 @@ def test_vector_store_persistence(temp_vector_store):
     assert len(docs) == 1
     assert docs[0].filename == "doc.txt"
     assert docs[0].chunk_count == 1
+
+
+def test_document_scoped_retrieval(temp_vector_store):
+    dummy_embeddings = DummyEmbeddingService()
+    chunks = [
+        DocumentChunk(
+            chunk_id="docA_001",
+            document_name="doc_a.txt",
+            page_number=1,
+            text="The vacation policy allows 20 days.",
+        ),
+        DocumentChunk(
+            chunk_id="docB_001",
+            document_name="doc_b.txt",
+            page_number=1,
+            text="The vacation leave schedule for contractor staff is 10 days.",
+        ),
+    ]
+    temp_vector_store.add_chunks(chunks, dummy_embeddings.embed_texts([c.text for c in chunks]))
+    retrieval = RetrievalService(temp_vector_store, dummy_embeddings)
+
+    # Retrieval scoped to doc_a.txt only
+    results_a = retrieval.retrieve("vacation policy", top_k=5, document_name="doc_a.txt")
+    assert len(results_a) == 1
+    assert results_a[0][0].document_name == "doc_a.txt"
+
+    # Retrieval scoped to doc_b.txt only
+    results_b = retrieval.retrieve("vacation policy", top_k=5, document_name="doc_b.txt")
+    assert len(results_b) == 1
+    assert results_b[0][0].document_name == "doc_b.txt"

@@ -59,6 +59,7 @@ class QAService:
             query=request.question,
             top_k=top_k,
             relevance_threshold=threshold,
+            document_name=request.document_name,
         )
 
         # Early return if no relevant chunks meet threshold

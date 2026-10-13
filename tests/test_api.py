@@ -121,3 +121,23 @@ def test_get_document_content(client):
     # Non-existent document
     res_404 = client.get("/documents/non_existent.txt")
     assert res_404.status_code == 404
+
+
+def test_document_scoped_ask(client):
+    # Ingest two distinct documents
+    doc1 = b"The primary caregiver parental leave is 16 weeks."
+    doc2 = b"The secondary caregiver parental leave is 6 weeks."
+    client.post("/documents/ingest", files={"file": ("doc_primary.txt", io.BytesIO(doc1), "text/plain")})
+    client.post("/documents/ingest", files={"file": ("doc_secondary.txt", io.BytesIO(doc2), "text/plain")})
+
+    # Ask with document_name filter
+    res = client.post(
+        "/ask",
+        json={"question": "parental leave weeks", "document_name": "doc_primary.txt"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["answerable"] is True
+    # Citations must come strictly from doc_primary.txt
+    for s in data["sources"]:
+        assert s["document"] == "doc_primary.txt"

@@ -78,26 +78,39 @@ class VectorStore:
         query_embedding: np.ndarray,
         top_k: int = 4,
         relevance_threshold: float = 0.35,
+        document_name: Optional[str] = None,
     ) -> List[Tuple[DocumentChunk, float]]:
         """Search the store for chunks matching the query embedding above the similarity threshold."""
         if self.index is None or self.index.ntotal == 0 or not self.chunks:
             return []
+
+        # If filtered by document, determine candidate indices
+        valid_indices = None
+        if document_name:
+            valid_indices = {i for i, c in enumerate(self.chunks) if c.document_name == document_name}
+            if not valid_indices:
+                return []
 
         # Ensure query embedding shape (1, d)
         q = np.asarray(query_embedding, dtype=np.float32)
         if q.ndim == 1:
             q = np.expand_dims(q, axis=0)
 
-        k = min(top_k, self.index.ntotal)
+        # If filtering by document, retrieve enough candidates to ensure top_k matches from the document
+        k = self.index.ntotal if valid_indices is not None else min(top_k, self.index.ntotal)
         scores, indices = self.index.search(q, k)
 
         results: List[Tuple[DocumentChunk, float]] = []
         for score, idx in zip(scores[0], indices[0]):
             if idx < 0 or idx >= len(self.chunks):
                 continue
+            if valid_indices is not None and idx not in valid_indices:
+                continue
             similarity = float(score)
             if similarity >= relevance_threshold:
                 results.append((self.chunks[idx], similarity))
+                if len(results) >= top_k:
+                    break
 
         return results
 

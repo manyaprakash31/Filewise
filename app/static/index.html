@@ -16,6 +16,8 @@
       --accent-subtle: #f0f6ff;
       --success-badge: #1f883d;
       --tag-bg: #f6f8fa;
+      --highlight-border: #0969da;
+      --highlight-bg: #f0f6ff;
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     }
 
@@ -36,6 +38,11 @@
     .container {
       max-width: 960px;
       margin: 0 auto;
+    }
+
+    /* Full width when in dedicated workspace mode */
+    .container.workspace-active {
+      max-width: 1200px;
     }
 
     header {
@@ -74,7 +81,7 @@
       gap: 1.5rem;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 860px) {
       .grid {
         grid-template-columns: 1fr;
       }
@@ -170,11 +177,6 @@
       border-bottom: none;
     }
 
-    .doc-item.active {
-      background: var(--accent-subtle);
-      border-radius: 4px;
-    }
-
     .doc-meta {
       color: var(--text-muted);
       font-size: 0.75rem;
@@ -251,6 +253,13 @@
       padding: 0.5rem 0.75rem;
       margin-bottom: 0.5rem;
       font-size: 0.825rem;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .source-card:hover {
+      border-color: var(--accent);
+      background-color: var(--accent-subtle);
     }
 
     .source-header {
@@ -293,98 +302,125 @@
       display: block;
     }
 
-    /* Modal dialog for viewing extracted chunks & document content */
-    .modal-overlay {
+    /* Dedicated Split-Screen Document Workspace View */
+    .workspace-view {
       display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(27, 31, 36, 0.5);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 1rem;
     }
 
-    .modal-overlay.open {
-      display: flex;
+    .workspace-view.active {
+      display: block;
     }
 
-    .modal-container {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      max-width: 720px;
-      width: 100%;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+    .main-view.hidden {
+      display: none;
     }
 
-    .modal-header {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border-color);
+    .workspace-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
     }
 
-    .modal-title {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .modal-close-btn {
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      line-height: 1;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-
-    .modal-close-btn:hover {
-      color: var(--text-main);
-    }
-
-    .modal-body {
-      padding: 1.25rem;
-      overflow-y: auto;
-      font-size: 0.85rem;
-      line-height: 1.6;
-    }
-
-    .chunk-block {
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
       background: var(--tag-bg);
       border: 1px solid var(--border-color);
+      padding: 0.4rem 0.85rem;
       border-radius: 6px;
-      padding: 0.85rem;
-      margin-bottom: 0.85rem;
+      color: var(--text-main);
+      font-size: 0.825rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
     }
 
-    .chunk-header {
+    .back-btn:hover {
+      background-color: var(--accent-subtle);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chunks-scroll-pane {
+      max-height: 720px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .chunk-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .chunk-card.supporting-evidence {
+      border: 1.5px solid var(--highlight-border);
+      background-color: var(--highlight-bg);
+      box-shadow: 0 0 0 1px var(--highlight-border);
+    }
+
+    .chunk-header-bar {
       display: flex;
       justify-content: space-between;
-      font-weight: 600;
+      align-items: center;
       font-size: 0.75rem;
+      font-weight: 600;
       color: var(--text-muted);
-      margin-bottom: 0.4rem;
       border-bottom: 1px dashed var(--border-color);
-      padding-bottom: 0.3rem;
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.6rem;
     }
 
-    .chunk-text {
-      white-space: pre-wrap;
+    .chunk-id-tag {
+      font-family: monospace;
+      color: var(--accent);
+      background: var(--tag-bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid var(--border-color);
+    }
+
+    .chunk-evidence-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #dafbe1;
+      color: #1a7f37;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+    }
+
+    .chunk-text-body {
+      font-size: 0.85rem;
+      line-height: 1.6;
       color: var(--text-main);
-      font-family: inherit;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="appContainer" class="container">
     <header>
       <div>
         <div class="brand-title">Filewise</div>
@@ -393,67 +429,103 @@
       <div id="statusBadge" class="system-badge">Connecting...</div>
     </header>
 
-    <div class="grid">
-      <!-- Left Column: Document Management -->
-      <div>
-        <div class="card">
-          <div class="card-title">Upload Documents</div>
-          <div class="file-input-wrapper" onclick="document.getElementById('fileInput').click()">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Click to select PDF, TXT, or MD</span>
-            <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md,.markdown" style="display: none;" onchange="handleFileSelected(event)">
-          </div>
-          <div id="selectedFilesLabel" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">No files chosen</div>
-          <button id="uploadBtn" class="btn" onclick="uploadFiles()" disabled>Ingest Documents</button>
-          <div id="uploadNotification" class="notification"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">
-            <span>Indexed Documents</span>
-            <span id="docCountBadge" class="system-badge">0</span>
-          </div>
-          <ul id="docList" class="doc-list">
-            <li class="empty-state">No documents indexed yet.</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Right Column: Ask & Grounded Answers -->
-      <div>
-        <div class="card">
-          <div class="card-title">Ask Question</div>
-          <textarea id="questionInput" class="textarea-query" placeholder="Ask a question grounded in the uploaded documents..."></textarea>
-          <button id="askBtn" class="btn" onclick="submitQuestion()">Ask Assistant</button>
-        </div>
-
-        <div class="card answer-panel">
-          <div class="card-title">Grounded Answer</div>
-          <div id="answerArea">
-            <div class="empty-state">Submit a question to see evidence-grounded answers with source citations.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Document Chunks & Extracted Text Modal -->
-  <div id="docModal" class="modal-overlay" onclick="closeModal(event)">
-    <div class="modal-container" onclick="event.stopPropagation()">
-      <div class="modal-header">
+    <!-- Main View: Uploads, Global Document List, Global Q&A -->
+    <div id="mainView" class="main-view">
+      <div class="grid">
+        <!-- Left Column: Document Management -->
         <div>
-          <div id="modalDocTitle" class="modal-title">Document Content</div>
-          <div id="modalDocMeta" class="doc-meta">Extracted Text & Indexed Chunks</div>
+          <div class="card">
+            <div class="card-title">Upload Documents</div>
+            <div class="file-input-wrapper" onclick="document.getElementById('fileInput').click()">
+              <span style="font-size: 0.85rem; color: var(--text-muted);">Click to select PDF, TXT, or MD</span>
+              <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md,.markdown" style="display: none;" onchange="handleFileSelected(event)">
+            </div>
+            <div id="selectedFilesLabel" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">No files chosen</div>
+            <button id="uploadBtn" class="btn" onclick="uploadFiles()" disabled>Ingest Documents</button>
+            <div id="uploadNotification" class="notification"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>Indexed Documents</span>
+              <span id="docCountBadge" class="system-badge">0</span>
+            </div>
+            <ul id="docList" class="doc-list">
+              <li class="empty-state">No documents indexed yet.</li>
+            </ul>
+          </div>
         </div>
-        <button class="modal-close-btn" onclick="closeModal()">&times;</button>
-      </div>
-      <div id="modalDocBody" class="modal-body">
-        <div class="empty-state">Loading document chunks...</div>
+
+        <!-- Right Column: Ask & Grounded Answers -->
+        <div>
+          <div class="card">
+            <div class="card-title">Ask Question Across All Documents</div>
+            <textarea id="questionInput" class="textarea-query" placeholder="Ask a question grounded in all uploaded documents..."></textarea>
+            <button id="askBtn" class="btn" onclick="submitGlobalQuestion()">Ask Assistant</button>
+          </div>
+
+          <div class="card answer-panel">
+            <div class="card-title">Grounded Answer</div>
+            <div id="answerArea">
+              <div class="empty-state">Submit a question to see evidence-grounded answers with source citations.</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Dedicated Split-Screen Document Workspace View -->
+    <div id="workspaceView" class="workspace-view">
+      <div class="workspace-toolbar">
+        <div>
+          <button class="back-btn" onclick="exitWorkspace()">← Back to All Documents</button>
+        </div>
+        <div style="text-align: right;">
+          <strong id="wsDocFilename" style="font-size: 0.95rem;">document.pdf</strong>
+          <div id="wsDocMeta" class="doc-meta">0 chunks indexed</div>
+        </div>
+      </div>
+
+      <div class="workspace-grid">
+        <!-- Left Side: Document's Extracted Text Divided into Numbered Chunks -->
+        <div>
+          <div class="card">
+            <div class="card-title">
+              <span>Extracted Document Chunks</span>
+              <span id="wsChunkCountBadge" class="system-badge">0 Chunks</span>
+            </div>
+            <div id="wsChunksContainer" class="chunks-scroll-pane">
+              <div class="empty-state">Loading document chunks...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Dedicated Document Q&A Panel with Evidence Attribution -->
+        <div>
+          <div class="card">
+            <div class="card-title">
+              <span>Ask About This Document</span>
+            </div>
+            <textarea id="wsQuestionInput" class="textarea-query" placeholder="Ask a question grounded specifically in this document..."></textarea>
+            <button id="wsAskBtn" class="btn" onclick="submitWorkspaceQuestion()">Ask Document Assistant</button>
+          </div>
+
+          <div class="card answer-panel">
+            <div class="card-title">Grounded Answer & Evidence</div>
+            <div id="wsAnswerArea">
+              <div class="empty-state">Ask a question to see answers grounded strictly in this document's text.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
     let selectedFiles = [];
+    let currentWorkspaceDoc = null;
+    let currentDocChunks = [];
 
     async function loadHealth() {
       try {
@@ -481,10 +553,10 @@
           list.innerHTML = data.documents.map(d => `
             <li class="doc-item">
               <div>
-                <strong>${d.filename}</strong>
+                <strong>${escapeHtml(d.filename)}</strong>
                 <div class="doc-meta">${d.chunk_count} chunk(s)${d.page_count ? ' • ' + d.page_count + ' page(s)' : ''}</div>
               </div>
-              <button class="btn-secondary" onclick="viewDocument('${encodeURIComponent(d.filename)}')">View Content</button>
+              <button class="btn-secondary" onclick="openWorkspace('${encodeURIComponent(d.filename)}')">View Content</button>
             </li>
           `).join('');
         }
@@ -493,55 +565,73 @@
       }
     }
 
-    async function viewDocument(encodedFilename) {
+    async function openWorkspace(encodedFilename) {
       const filename = decodeURIComponent(encodedFilename);
-      const modal = document.getElementById('docModal');
-      const title = document.getElementById('modalDocTitle');
-      const meta = document.getElementById('modalDocMeta');
-      const body = document.getElementById('modalDocBody');
+      currentWorkspaceDoc = filename;
 
-      title.textContent = filename;
-      meta.textContent = 'Fetching indexed chunks...';
-      body.innerHTML = '<div class="empty-state">Loading extracted document chunks...</div>';
-      modal.classList.add('open');
+      // Switch views
+      document.getElementById('mainView').classList.add('hidden');
+      document.getElementById('workspaceView').classList.add('active');
+      document.getElementById('appContainer').classList.add('workspace-active');
+
+      document.getElementById('wsDocFilename').textContent = filename;
+      document.getElementById('wsDocMeta').textContent = 'Loading extracted text...';
+      document.getElementById('wsChunksContainer').innerHTML = '<div class="empty-state">Loading document chunks...</div>';
+      document.getElementById('wsQuestionInput').value = '';
+      document.getElementById('wsAnswerArea').innerHTML = '<div class="empty-state">Ask a question to see answers grounded strictly in this document\'s text.</div>';
 
       try {
         const res = await fetch(`/api/v1/documents/${encodeURIComponent(filename)}`);
         if (!res.ok) {
-          body.innerHTML = `<div class="empty-state" style="color: #cf222e;">Failed to load content for ${filename}</div>`;
+          document.getElementById('wsChunksContainer').innerHTML = `<div class="empty-state" style="color: #cf222e;">Failed to load document content for ${escapeHtml(filename)}.</div>`;
           return;
         }
 
         const data = await res.json();
-        meta.textContent = `${data.chunk_count} chunk(s) indexed${data.page_count ? ' across ' + data.page_count + ' page(s)' : ''}`;
+        currentDocChunks = data.chunks || [];
+        document.getElementById('wsDocMeta').textContent = `${data.chunk_count} chunk(s) indexed${data.page_count ? ' • ' + data.page_count + ' page(s)' : ''}`;
+        document.getElementById('wsChunkCountBadge').textContent = `${data.chunk_count} Chunk(s)`;
 
-        if (!data.chunks || data.chunks.length === 0) {
-          body.innerHTML = '<div class="empty-state">No extracted chunks found for this document.</div>';
-          return;
-        }
-
-        body.innerHTML = data.chunks.map((c, idx) => `
-          <div class="chunk-block">
-            <div class="chunk-header">
-              <span>Chunk #${idx + 1} (${c.chunk_id})</span>
-              <span>${c.page_number ? 'Page ' + c.page_number : 'Full Document'}</span>
-            </div>
-            <div class="chunk-text">${escapeHtml(c.text)}</div>
-          </div>
-        `).join('');
+        renderWorkspaceChunks(currentDocChunks);
       } catch (err) {
-        body.innerHTML = `<div class="empty-state" style="color: #cf222e;">Error: ${err.message}</div>`;
+        document.getElementById('wsChunksContainer').innerHTML = `<div class="empty-state" style="color: #cf222e;">Error: ${escapeHtml(err.message)}</div>`;
       }
     }
 
-    function closeModal(e) {
-      document.getElementById('docModal').classList.remove('open');
+    function renderWorkspaceChunks(chunks, highlightedChunkIds = []) {
+      const container = document.getElementById('wsChunksContainer');
+      if (!chunks || chunks.length === 0) {
+        container.innerHTML = '<div class="empty-state">No chunks found in this document.</div>';
+        return;
+      }
+
+      container.innerHTML = chunks.map((c, idx) => {
+        const isSupporting = highlightedChunkIds.includes(c.chunk_id);
+        const cardClass = isSupporting ? 'chunk-card supporting-evidence' : 'chunk-card';
+        const badge = isSupporting ? '<span class="chunk-evidence-badge">✓ Supporting Evidence</span>' : '';
+        return `
+          <div id="chunk-card-${escapeHtml(c.chunk_id)}" class="${cardClass}">
+            <div class="chunk-header-bar">
+              <div>
+                <span>Chunk #${idx + 1}</span>
+                <span class="chunk-id-tag">#${escapeHtml(c.chunk_id)}</span>
+                ${badge}
+              </div>
+              <span>${c.page_number ? 'Page ' + c.page_number : 'Single Page'}</span>
+            </div>
+            <div class="chunk-text-body">${escapeHtml(c.text)}</div>
+          </div>
+        `;
+      }).join('');
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function exitWorkspace() {
+      currentWorkspaceDoc = null;
+      currentDocChunks = [];
+      document.getElementById('workspaceView').classList.remove('active');
+      document.getElementById('mainView').classList.remove('hidden');
+      document.getElementById('appContainer').classList.remove('workspace-active');
+      refreshDocuments();
     }
 
     function handleFileSelected(e) {
@@ -604,7 +694,7 @@
       }
     }
 
-    async function submitQuestion() {
+    async function submitGlobalQuestion() {
       const qInput = document.getElementById('questionInput');
       const q = qInput.value.trim();
       if (!q) return;
@@ -622,46 +712,101 @@
           body: JSON.stringify({ question: q })
         });
         const data = await res.json();
-
-        if (!res.ok) {
-          area.innerHTML = `<div class="status-badge unavailable">Error</div><div class="answer-text">${data.detail || 'Failed to retrieve answer.'}</div>`;
-          return;
-        }
-
-        const badgeClass = data.answerable ? 'answerable' : 'unavailable';
-        const badgeText = data.answerable ? 'Grounded in Evidence' : 'Information Unavailable';
-
-        let sourcesHtml = '';
-        if (data.sources && data.sources.length > 0) {
-          sourcesHtml = `
-            <div class="sources-section">
-              <div class="sources-title">Supporting Sources & Excerpts</div>
-              ${data.sources.map(s => `
-                <div class="source-card">
-                  <div class="source-header">
-                    <span>${s.document}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
-                    <span>${s.chunk_id ? '#' + s.chunk_id : ''}</span>
-                  </div>
-                  <div class="source-excerpt">"${escapeHtml(s.excerpt)}"</div>
-                </div>
-              `).join('')}
-            </div>
-          `;
-        }
-
-        area.innerHTML = `
-          <div>
-            <span class="status-badge ${badgeClass}">${badgeText}</span>
-            <div class="answer-text">${escapeHtml(data.answer)}</div>
-            ${sourcesHtml}
-          </div>
-        `;
+        renderAnswerResponse(area, data);
       } catch (e) {
-        area.innerHTML = `<div class="status-badge unavailable">Network Error</div><div class="answer-text">${e.message}</div>`;
+        area.innerHTML = `<div class="status-badge unavailable">Network Error</div><div class="answer-text">${escapeHtml(e.message)}</div>`;
       } finally {
         btn.disabled = false;
         btn.textContent = 'Ask Assistant';
       }
+    }
+
+    async function submitWorkspaceQuestion() {
+      const qInput = document.getElementById('wsQuestionInput');
+      const q = qInput.value.trim();
+      if (!q || !currentWorkspaceDoc) return;
+
+      const btn = document.getElementById('wsAskBtn');
+      const area = document.getElementById('wsAnswerArea');
+      btn.disabled = true;
+      btn.textContent = 'Searching document...';
+      area.innerHTML = '<div class="empty-state">Retrieving evidence from this document...</div>';
+
+      try {
+        const res = await fetch('/api/v1/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: q,
+            document_name: currentWorkspaceDoc
+          })
+        });
+        const data = await res.json();
+        renderAnswerResponse(area, data);
+
+        // Highlight supporting chunks in the left chunk pane
+        const supportingChunkIds = (data.sources || []).map(s => s.chunk_id).filter(Boolean);
+        renderWorkspaceChunks(currentDocChunks, supportingChunkIds);
+
+        // Scroll first supporting chunk into view if found
+        if (supportingChunkIds.length > 0) {
+          const firstTarget = document.getElementById(`chunk-card-${supportingChunkIds[0]}`);
+          if (firstTarget) {
+            firstTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+      } catch (e) {
+        area.innerHTML = `<div class="status-badge unavailable">Network Error</div><div class="answer-text">${escapeHtml(e.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Ask Document Assistant';
+      }
+    }
+
+    function renderAnswerResponse(targetElement, data) {
+      const badgeClass = data.answerable ? 'answerable' : 'unavailable';
+      const badgeText = data.answerable ? 'Grounded in Evidence' : 'Information Unavailable';
+
+      let sourcesHtml = '';
+      if (data.sources && data.sources.length > 0) {
+        sourcesHtml = `
+          <div class="sources-section">
+            <div class="sources-title">Supporting Sources & Excerpts</div>
+            ${data.sources.map(s => `
+              <div class="source-card" onclick="scrollToChunk('${escapeHtml(s.chunk_id)}')">
+                <div class="source-header">
+                  <span>${escapeHtml(s.document)}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
+                  <span>${s.chunk_id ? '#' + escapeHtml(s.chunk_id) : ''}</span>
+                </div>
+                <div class="source-excerpt">"${escapeHtml(s.excerpt)}"</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      targetElement.innerHTML = `
+        <div>
+          <span class="status-badge ${badgeClass}">${badgeText}</span>
+          <div class="answer-text">${escapeHtml(data.answer)}</div>
+          ${sourcesHtml}
+        </div>
+      `;
+    }
+
+    function scrollToChunk(chunkId) {
+      if (!chunkId) return;
+      const target = document.getElementById(`chunk-card-${chunkId}`);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     // Initialize

@@ -30,7 +30,10 @@ async def lifespan(app: FastAPI):
 
     # Initialize Vector Store if not already injected
     if not hasattr(app.state, "vector_store") or app.state.vector_store is None:
-        app.state.vector_store = VectorStore(storage_dir=settings.vector_store_path)
+        vs = VectorStore(storage_dir=settings.vector_store_path)
+        # Requirement: Temporary session storage - clear old vector store data on startup
+        vs.clear()
+        app.state.vector_store = vs
 
     # Initialize Embedding Service if not already injected
     if not hasattr(app.state, "embedding_service") or app.state.embedding_service is None:
