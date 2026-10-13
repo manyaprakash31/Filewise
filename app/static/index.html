@@ -15,6 +15,9 @@
       --accent-hover: #0757b6;
       --accent-subtle: #f0f6ff;
       --success-badge: #1f883d;
+      --success-bg: #dafbe1;
+      --danger-badge: #cf222e;
+      --danger-bg: #ffebe9;
       --tag-bg: #f6f8fa;
       --highlight-border: #0969da;
       --highlight-bg: #f0f6ff;
@@ -32,21 +35,21 @@
       color: var(--text-main);
       font-family: var(--font-family);
       line-height: 1.5;
-      padding: 2.5rem 1.5rem;
+      padding: 2rem 1.5rem;
     }
 
     .container {
-      max-width: 960px;
+      max-width: 980px;
       margin: 0 auto;
+      transition: max-width 0.2s ease;
     }
 
-    /* Full width when in dedicated workspace mode */
     .container.workspace-active {
-      max-width: 1200px;
+      max-width: 1280px;
     }
 
     header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 1.25rem;
       display: flex;
@@ -55,15 +58,15 @@
     }
 
     .brand-title {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 600;
       letter-spacing: -0.02em;
     }
 
     .brand-subtitle {
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      margin-top: 0.25rem;
+      margin-top: 0.2rem;
     }
 
     .system-badge {
@@ -112,6 +115,7 @@
       background: var(--tag-bg);
       cursor: pointer;
       margin-bottom: 0.75rem;
+      transition: border-color 0.15s ease;
     }
 
     .file-input-wrapper:hover {
@@ -129,6 +133,10 @@
       cursor: pointer;
       width: 100%;
       transition: background-color 0.15s ease;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .btn:hover {
@@ -145,10 +153,14 @@
       color: var(--text-main);
       border: 1px solid var(--border-color);
       font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 4px;
       cursor: pointer;
       width: auto;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
     }
 
     .btn-secondary:hover {
@@ -160,7 +172,7 @@
     .doc-list {
       list-style: none;
       font-size: 0.825rem;
-      max-height: 260px;
+      max-height: 280px;
       overflow-y: auto;
     }
 
@@ -171,6 +183,16 @@
       justify-content: space-between;
       align-items: center;
       transition: background 0.1s ease;
+      cursor: pointer;
+    }
+
+    .doc-item:hover {
+      background-color: var(--tag-bg);
+    }
+
+    .doc-item.active {
+      background-color: var(--accent-subtle);
+      border-radius: 4px;
     }
 
     .doc-item:last-child {
@@ -222,13 +244,13 @@
     }
 
     .status-badge.answerable {
-      background: #dafbe1;
-      color: #1a7f37;
+      background: var(--success-bg);
+      color: var(--success-badge);
     }
 
     .status-badge.unavailable {
-      background: #ffebe9;
-      color: #cf222e;
+      background: var(--danger-bg);
+      color: var(--danger-badge);
     }
 
     .sources-section {
@@ -238,7 +260,7 @@
     }
 
     .sources-title {
-      font-size: 0.825rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -284,25 +306,109 @@
 
     .notification {
       font-size: 0.8rem;
-      padding: 0.5rem;
+      padding: 0.6rem 0.75rem;
       border-radius: 4px;
-      margin-top: 0.5rem;
+      margin-top: 0.6rem;
       display: none;
+      line-height: 1.4;
     }
 
     .notification.success {
-      background: #dafbe1;
-      color: #1a7f37;
+      background: var(--success-bg);
+      color: var(--success-badge);
       display: block;
     }
 
     .notification.error {
-      background: #ffebe9;
-      color: #cf222e;
+      background: var(--danger-bg);
+      color: var(--danger-badge);
       display: block;
     }
 
-    /* Dedicated Split-Screen Document Workspace View */
+    .notification.info {
+      background: var(--accent-subtle);
+      color: var(--accent);
+      display: block;
+    }
+
+    /* Batch Ingestion Results List */
+    .batch-results-list {
+      margin-top: 0.5rem;
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .batch-result-item {
+      padding: 0.35rem 0.6rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .batch-result-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Workspace Navigation Topbar */
+    .workspace-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .workspace-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .doc-select-dropdown {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: var(--card-bg);
+      cursor: pointer;
+      max-width: 320px;
+    }
+
+    .doc-select-dropdown:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .workspace-toolbar-right {
+      text-align: right;
+    }
+
+    /* Split-Screen Workspace Grid */
     .workspace-view {
       display: none;
     }
@@ -313,36 +419,6 @@
 
     .main-view.hidden {
       display: none;
-    }
-
-    .workspace-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      background: var(--tag-bg);
-      border: 1px solid var(--border-color);
-      padding: 0.4rem 0.85rem;
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 0.825rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .back-btn:hover {
-      background-color: var(--accent-subtle);
-      border-color: var(--accent);
-      color: var(--accent);
     }
 
     .workspace-grid {
@@ -359,9 +435,9 @@
     }
 
     .chunks-scroll-pane {
-      max-height: 720px;
+      max-height: 740px;
       overflow-y: auto;
-      padding-right: 0.25rem;
+      padding-right: 0.35rem;
     }
 
     .chunk-card {
@@ -370,7 +446,7 @@
       border-radius: 6px;
       padding: 1rem;
       margin-bottom: 0.85rem;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .chunk-card.supporting-evidence {
@@ -404,8 +480,8 @@
       display: inline-block;
       font-size: 0.7rem;
       font-weight: 600;
-      background: #dafbe1;
-      color: #1a7f37;
+      background: var(--success-bg);
+      color: var(--success-badge);
       padding: 0.15rem 0.4rem;
       border-radius: 3px;
       margin-left: 0.5rem;
@@ -432,7 +508,7 @@
     <!-- Main View: Uploads, Global Document List, Global Q&A -->
     <div id="mainView" class="main-view">
       <div class="grid">
-        <!-- Left Column: Document Management -->
+        <!-- Left Column: Document Management & Upload -->
         <div>
           <div class="card">
             <div class="card-title">Upload Documents</div>
@@ -441,8 +517,11 @@
               <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md,.markdown" style="display: none;" onchange="handleFileSelected(event)">
             </div>
             <div id="selectedFilesLabel" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">No files chosen</div>
-            <button id="uploadBtn" class="btn" onclick="uploadFiles()" disabled>Ingest Documents</button>
+            <button id="uploadBtn" class="btn" onclick="uploadFiles()" disabled>
+              <span id="uploadBtnText">Ingest Documents</span>
+            </button>
             <div id="uploadNotification" class="notification"></div>
+            <div id="batchResultsList" class="batch-results-list" style="display: none;"></div>
           </div>
 
           <div class="card">
@@ -456,12 +535,14 @@
           </div>
         </div>
 
-        <!-- Right Column: Ask & Grounded Answers -->
+        <!-- Right Column: Ask & Grounded Answers Across All Documents -->
         <div>
           <div class="card">
             <div class="card-title">Ask Question Across All Documents</div>
             <textarea id="questionInput" class="textarea-query" placeholder="Ask a question grounded in all uploaded documents..."></textarea>
-            <button id="askBtn" class="btn" onclick="submitGlobalQuestion()">Ask Assistant</button>
+            <button id="askBtn" class="btn" onclick="submitGlobalQuestion()">
+              <span id="askBtnText">Ask Assistant</span>
+            </button>
           </div>
 
           <div class="card answer-panel">
@@ -477,17 +558,23 @@
     <!-- Dedicated Split-Screen Document Workspace View -->
     <div id="workspaceView" class="workspace-view">
       <div class="workspace-toolbar">
-        <div>
-          <button class="back-btn" onclick="exitWorkspace()">← Back to All Documents</button>
+        <div class="workspace-toolbar-left">
+          <button class="btn-secondary" onclick="exitWorkspace()" style="padding: 0.4rem 0.75rem; font-size: 0.825rem;">
+            ← Back to All Documents
+          </button>
+          <!-- Document Switcher Dropdown to navigate across indexed documents without leaving workspace -->
+          <select id="wsDocSelector" class="doc-select-dropdown" onchange="handleWorkspaceDocSwitch(this.value)">
+            <option value="">Select Document...</option>
+          </select>
         </div>
-        <div style="text-align: right;">
+        <div class="workspace-toolbar-right">
           <strong id="wsDocFilename" style="font-size: 0.95rem;">document.pdf</strong>
           <div id="wsDocMeta" class="doc-meta">0 chunks indexed</div>
         </div>
       </div>
 
       <div class="workspace-grid">
-        <!-- Left Side: Document's Extracted Text Divided into Numbered Chunks -->
+        <!-- Left Side: Selected Document's Extracted Text Divided into Numbered Chunks -->
         <div>
           <div class="card">
             <div class="card-title">
@@ -500,14 +587,16 @@
           </div>
         </div>
 
-        <!-- Right Side: Dedicated Document Q&A Panel with Evidence Attribution -->
+        <!-- Right Side: Document-Specific Q&A Panel with Verifiable Evidence -->
         <div>
           <div class="card">
             <div class="card-title">
               <span>Ask About This Document</span>
             </div>
             <textarea id="wsQuestionInput" class="textarea-query" placeholder="Ask a question grounded specifically in this document..."></textarea>
-            <button id="wsAskBtn" class="btn" onclick="submitWorkspaceQuestion()">Ask Document Assistant</button>
+            <button id="wsAskBtn" class="btn" onclick="submitWorkspaceQuestion()">
+              <span id="wsAskBtnText">Ask Document Assistant</span>
+            </button>
           </div>
 
           <div class="card answer-panel">
@@ -526,6 +615,7 @@
     let selectedFiles = [];
     let currentWorkspaceDoc = null;
     let currentDocChunks = [];
+    let indexedDocsList = [];
 
     async function loadHealth() {
       try {
@@ -544,21 +634,36 @@
         const res = await fetch('/api/v1/documents');
         if (res.ok) {
           const data = await res.json();
-          const list = document.getElementById('docList');
+          indexedDocsList = data.documents || [];
           document.getElementById('docCountBadge').textContent = data.total_documents;
-          if (data.documents.length === 0) {
+
+          // Update main list
+          const list = document.getElementById('docList');
+          if (indexedDocsList.length === 0) {
             list.innerHTML = '<li class="empty-state">No documents indexed yet.</li>';
-            return;
+          } else {
+            list.innerHTML = indexedDocsList.map(d => `
+              <li class="doc-item ${currentWorkspaceDoc === d.filename ? 'active' : ''}" onclick="openWorkspace('${encodeURIComponent(d.filename)}')">
+                <div>
+                  <strong>${escapeHtml(d.filename)}</strong>
+                  <div class="doc-meta">${d.chunk_count} chunk(s)${d.page_count ? ' • ' + d.page_count + ' page(s)' : ''}</div>
+                </div>
+                <button class="btn-secondary" onclick="event.stopPropagation(); openWorkspace('${encodeURIComponent(d.filename)}')">View Content</button>
+              </li>
+            `).join('');
           }
-          list.innerHTML = data.documents.map(d => `
-            <li class="doc-item">
-              <div>
-                <strong>${escapeHtml(d.filename)}</strong>
-                <div class="doc-meta">${d.chunk_count} chunk(s)${d.page_count ? ' • ' + d.page_count + ' page(s)' : ''}</div>
-              </div>
-              <button class="btn-secondary" onclick="openWorkspace('${encodeURIComponent(d.filename)}')">View Content</button>
-            </li>
-          `).join('');
+
+          // Update workspace document selector dropdown
+          const selector = document.getElementById('wsDocSelector');
+          if (indexedDocsList.length > 0) {
+            selector.innerHTML = indexedDocsList.map(d => `
+              <option value="${escapeHtml(d.filename)}" ${currentWorkspaceDoc === d.filename ? 'selected' : ''}>
+                ${escapeHtml(d.filename)} (${d.chunk_count} chunks)
+              </option>
+            `).join('');
+          } else {
+            selector.innerHTML = '<option value="">No documents indexed</option>';
+          }
         }
       } catch (e) {
         console.error("Failed to load documents", e);
@@ -569,7 +674,7 @@
       const filename = decodeURIComponent(encodedFilename);
       currentWorkspaceDoc = filename;
 
-      // Switch views
+      // Switch to split-screen workspace view
       document.getElementById('mainView').classList.add('hidden');
       document.getElementById('workspaceView').classList.add('active');
       document.getElementById('appContainer').classList.add('workspace-active');
@@ -579,6 +684,10 @@
       document.getElementById('wsChunksContainer').innerHTML = '<div class="empty-state">Loading document chunks...</div>';
       document.getElementById('wsQuestionInput').value = '';
       document.getElementById('wsAnswerArea').innerHTML = '<div class="empty-state">Ask a question to see answers grounded strictly in this document\'s text.</div>';
+
+      // Keep dropdown aligned
+      const selector = document.getElementById('wsDocSelector');
+      if (selector) selector.value = filename;
 
       try {
         const res = await fetch(`/api/v1/documents/${encodeURIComponent(filename)}`);
@@ -596,6 +705,11 @@
       } catch (err) {
         document.getElementById('wsChunksContainer').innerHTML = `<div class="empty-state" style="color: #cf222e;">Error: ${escapeHtml(err.message)}</div>`;
       }
+    }
+
+    function handleWorkspaceDocSwitch(filename) {
+      if (!filename || filename === currentWorkspaceDoc) return;
+      openWorkspace(encodeURIComponent(filename));
     }
 
     function renderWorkspaceChunks(chunks, highlightedChunkIds = []) {
@@ -638,6 +752,10 @@
       selectedFiles = Array.from(e.target.files);
       const label = document.getElementById('selectedFilesLabel');
       const btn = document.getElementById('uploadBtn');
+      const batchList = document.getElementById('batchResultsList');
+      batchList.style.display = 'none';
+      batchList.innerHTML = '';
+
       if (selectedFiles.length > 0) {
         label.textContent = `${selectedFiles.length} file(s) selected: ` + selectedFiles.map(f => f.name).join(', ');
         btn.disabled = false;
@@ -650,20 +768,26 @@
     async function uploadFiles() {
       if (selectedFiles.length === 0) return;
       const btn = document.getElementById('uploadBtn');
+      const btnText = document.getElementById('uploadBtnText');
       const notif = document.getElementById('uploadNotification');
+      const batchList = document.getElementById('batchResultsList');
+
       btn.disabled = true;
-      btn.textContent = 'Ingesting...';
-      notif.className = 'notification';
+      btnText.innerHTML = '<span class="spinner"></span> Ingesting...';
+      notif.className = 'notification info';
+      notif.textContent = `Processing and indexing ${selectedFiles.length} document(s)...`;
+      batchList.style.display = 'none';
+      batchList.innerHTML = '';
+
+      const isSingleUpload = selectedFiles.length === 1;
 
       try {
-        let endpoint = '/api/v1/documents/ingest';
-        let body;
-        if (selectedFiles.length === 1) {
-          body = new FormData();
+        let endpoint = isSingleUpload ? '/api/v1/documents/ingest' : '/api/v1/documents/ingest/batch';
+        let body = new FormData();
+
+        if (isSingleUpload) {
           body.append('file', selectedFiles[0]);
         } else {
-          endpoint = '/api/v1/documents/ingest/batch';
-          body = new FormData();
           for (const f of selectedFiles) {
             body.append('files', f);
           }
@@ -673,14 +797,50 @@
         const data = await res.json();
 
         if (res.ok) {
-          notif.className = 'notification success';
-          notif.textContent = selectedFiles.length === 1 
-            ? `${data.filename}: ${data.message}` 
-            : `Indexed ${data.successful} of ${data.total_files} file(s).`;
-          selectedFiles = [];
-          document.getElementById('fileInput').value = '';
-          document.getElementById('selectedFilesLabel').textContent = 'No files chosen';
           await refreshDocuments();
+
+          if (isSingleUpload) {
+            notif.className = 'notification success';
+            notif.textContent = `Successfully indexed "${data.filename}" (${data.chunks_indexed} chunks). Opening workspace...`;
+
+            // Reset file picker
+            selectedFiles = [];
+            document.getElementById('fileInput').value = '';
+            document.getElementById('selectedFilesLabel').textContent = 'No files chosen';
+
+            // Requirement 1: Automatically open the document workspace for the newly indexed document!
+            setTimeout(() => {
+              openWorkspace(encodeURIComponent(data.filename));
+            }, 600);
+          } else {
+            // Requirement 4: Multiple uploads - show individual ingestion statuses and let user select which document to inspect
+            notif.className = 'notification success';
+            notif.textContent = `Batch upload finished: ${data.successful} of ${data.total_files} file(s) indexed. Click a document below to inspect.`;
+
+            batchList.style.display = 'block';
+            batchList.innerHTML = data.results.map(r => {
+              const statusColor = r.status === 'indexed' ? 'var(--success-badge)' : (r.status === 'already_indexed' ? 'var(--accent)' : 'var(--danger-badge)');
+              const canView = r.status === 'indexed' || r.status === 'already_indexed';
+              const action = canView 
+                ? `<button class="btn-secondary" onclick="openWorkspace('${encodeURIComponent(r.filename)}')">Inspect</button>`
+                : `<span style="color: var(--danger-badge); font-size: 0.7rem;">${escapeHtml(r.message)}</span>`;
+              return `
+                <div class="batch-result-item">
+                  <div>
+                    <strong>${escapeHtml(r.filename)}</strong>
+                    <span style="color: ${statusColor}; margin-left: 0.4rem;">[${r.status}]</span>
+                    ${r.chunks_indexed ? `<span class="doc-meta">(${r.chunks_indexed} chunks)</span>` : ''}
+                  </div>
+                  <div>${action}</div>
+                </div>
+              `;
+            }).join('');
+
+            // Reset file picker
+            selectedFiles = [];
+            document.getElementById('fileInput').value = '';
+            document.getElementById('selectedFilesLabel').textContent = 'No files chosen';
+          }
         } else {
           notif.className = 'notification error';
           notif.textContent = data.detail || 'Upload failed.';
@@ -689,7 +849,7 @@
         notif.className = 'notification error';
         notif.textContent = 'Upload error: ' + err.message;
       } finally {
-        btn.textContent = 'Ingest Documents';
+        btnText.textContent = 'Ingest Documents';
         btn.disabled = selectedFiles.length === 0;
       }
     }
@@ -700,9 +860,10 @@
       if (!q) return;
 
       const btn = document.getElementById('askBtn');
+      const btnText = document.getElementById('askBtnText');
       const area = document.getElementById('answerArea');
       btn.disabled = true;
-      btn.textContent = 'Searching evidence...';
+      btnText.innerHTML = '<span class="spinner"></span> Searching...';
       area.innerHTML = '<div class="empty-state">Retrieving relevant chunks and verifying evidence...</div>';
 
       try {
@@ -712,12 +873,12 @@
           body: JSON.stringify({ question: q })
         });
         const data = await res.json();
-        renderAnswerResponse(area, data);
+        renderAnswerResponse(area, data, false);
       } catch (e) {
         area.innerHTML = `<div class="status-badge unavailable">Network Error</div><div class="answer-text">${escapeHtml(e.message)}</div>`;
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Ask Assistant';
+        btnText.textContent = 'Ask Assistant';
       }
     }
 
@@ -727,9 +888,10 @@
       if (!q || !currentWorkspaceDoc) return;
 
       const btn = document.getElementById('wsAskBtn');
+      const btnText = document.getElementById('wsAskBtnText');
       const area = document.getElementById('wsAnswerArea');
       btn.disabled = true;
-      btn.textContent = 'Searching document...';
+      btnText.innerHTML = '<span class="spinner"></span> Searching...';
       area.innerHTML = '<div class="empty-state">Retrieving evidence from this document...</div>';
 
       try {
@@ -742,13 +904,13 @@
           })
         });
         const data = await res.json();
-        renderAnswerResponse(area, data);
+        renderAnswerResponse(area, data, true);
 
         // Highlight supporting chunks in the left chunk pane
         const supportingChunkIds = (data.sources || []).map(s => s.chunk_id).filter(Boolean);
         renderWorkspaceChunks(currentDocChunks, supportingChunkIds);
 
-        // Scroll first supporting chunk into view if found
+        // Scroll to first supporting chunk if found
         if (supportingChunkIds.length > 0) {
           const firstTarget = document.getElementById(`chunk-card-${supportingChunkIds[0]}`);
           if (firstTarget) {
@@ -759,11 +921,11 @@
         area.innerHTML = `<div class="status-badge unavailable">Network Error</div><div class="answer-text">${escapeHtml(e.message)}</div>`;
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Ask Document Assistant';
+        btnText.textContent = 'Ask Document Assistant';
       }
     }
 
-    function renderAnswerResponse(targetElement, data) {
+    function renderAnswerResponse(targetElement, data, isWorkspace = false) {
       const badgeClass = data.answerable ? 'answerable' : 'unavailable';
       const badgeText = data.answerable ? 'Grounded in Evidence' : 'Information Unavailable';
 
@@ -773,7 +935,7 @@
           <div class="sources-section">
             <div class="sources-title">Supporting Sources & Excerpts</div>
             ${data.sources.map(s => `
-              <div class="source-card" onclick="scrollToChunk('${escapeHtml(s.chunk_id)}')">
+              <div class="source-card" onclick="${isWorkspace ? `scrollToChunk('${escapeHtml(s.chunk_id)}')` : `openWorkspace('${encodeURIComponent(s.document)}')`}">
                 <div class="source-header">
                   <span>${escapeHtml(s.document)}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
                   <span>${s.chunk_id ? '#' + escapeHtml(s.chunk_id) : ''}</span>

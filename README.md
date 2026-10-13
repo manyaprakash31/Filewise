@@ -7,16 +7,17 @@ An evidence-grounded AI knowledge assistant that answers questions strictly usin
 ## 1. Overview & Core Features
 
 - **Multi-Format Document Ingestion**: Ingests `.pdf`, `.txt`, and `.md` / `.markdown` files.
-- **Clean Structure & Metadata Preservation**: Splits documents into configurable overlapping chunks while preserving original filenames, chunk identifiers (`#doc_001`), and page numbers (from PDFs).
-- **Local Semantic Embeddings**: Utilizes local `sentence-transformers` (`all-MiniLM-L6-v2`) by default, completely eliminating embedding API costs and external network bottlenecks.
-- **Persistent Vector Store**: High-performance semantic indexing powered by FAISS (`IndexFlatIP`) with JSON metadata persistence.
-- **Dedicated Semantic Retrieval**: Query vector embedding with top-k ranking and a calibrated cosine relevance threshold (default `0.35`) to filter out irrelevant material.
-- **Evidence-Grounded Question Answering**: Answers are generated strictly from retrieved excerpts. Unanswerable or unsupported questions return an explicit abstention (`answerable: false`) with no fabricated sources.
-- **Verbatim Source Attribution**: Substantive responses return the original filename, 1-based page number, chunk identifier, and exact supporting excerpt.
+- **Dedicated Split-Screen Workspace**: Automatically opens a split-screen document inspection and Q&A workspace upon upload.
+- **Chunk-Level Evidence Navigation**: Displays extracted document text divided into numbered chunks with IDs and page numbers; highlights supporting evidence with visual badges.
+- **Fast Document Switching**: Switch between uploaded documents via a compact topbar selector without leaving the workspace.
+- **Batch Upload Inspection**: Handles multi-document uploads gracefully with individual status badges and one-click inspection buttons.
+- **Local Semantic Embeddings**: Utilizes local `sentence-transformers` (`all-MiniLM-L6-v2`) by default, completely eliminating embedding API costs.
+- **Temporary Session Storage**: Uploaded files and vector-store entries are kept only for the active session and are cleared automatically on application restart.
+- **Persistent Vector Store & Retrieval**: High-performance semantic indexing powered by FAISS (`IndexFlatIP`) with cosine relevance thresholding (`0.35`).
+- **Verbatim Source Attribution**: Substantive responses return original filenames, page numbers, chunk identifiers, and exact supporting excerpts.
 - **Configurable LLM Backend**: Supports `mock` (deterministic local rule-based extractor for zero-cost offline testing), `gemini` (via official `google-genai` SDK), and `openai` (via standard REST chat completions).
-- **FastAPI Backend**: Fully typed REST API with Pydantic request/response validation, health checks, single/batch ingestion, document listing, and Swagger UI at `/docs`.
-- **Integrated Productivity Workspace**: Clean, distraction-free HTML5/CSS3 frontend workspace served directly at `http://127.0.0.1:8000/`.
-- **Automated Testing & Evaluation**: 24 automated pytest tests (100% passing) and an automated evaluation runner evaluating 16 test cases across 5 categories.
+- **FastAPI Backend**: Fully typed REST API with Pydantic validation, health checks, single/batch ingestion, document listing, and Swagger UI at `/docs`.
+- **Automated Testing & Evaluation**: 27 automated pytest tests (100% passing) and an automated evaluation runner evaluating 16 benchmark test cases.
 - **Container Ready**: Production `Dockerfile` and `docker-compose.yml` with health checks and persistent volume mounting.
 
 ---
@@ -52,7 +53,7 @@ flowchart TD
 
 | Component | Choice | Rationale |
 |---|---|---|
-| **Language** | Python 3.12 / 3.11 | High reliability, modern typing syntax, wide library compatibility. |
+| **Language** | Python 3.11 / 3.12 | Modern typing syntax, high reliability, and wide library compatibility. |
 | **API Framework** | FastAPI + Uvicorn | High-performance asynchronous REST endpoints, automatic OpenAPI documentation, strict Pydantic validation. |
 | **Document Parsing** | `pypdf`, `markdown`, Python standard library | Native page-by-page extraction for PDFs and clean sectioning for TXT and Markdown without heavyweight system dependencies. |
 | **Embeddings** | `sentence-transformers` (`all-MiniLM-L6-v2`) | Fast 384-dimensional dense vectors running locally on CPU without external API fees or rate limits. |
@@ -66,20 +67,20 @@ flowchart TD
 ## 4. Project Directory Structure
 
 ```text
-D:\Filewise\
-├── app\
+filewise/
+├── app/
 │   ├── __init__.py
 │   ├── main.py                  # FastAPI application entrypoint & lifespan
-│   ├── api\
+│   ├── api/
 │   │   ├── __init__.py
 │   │   └── routes.py            # API routes (/health, /documents, /ask)
-│   ├── core\
+│   ├── core/
 │   │   ├── __init__.py
 │   │   └── config.py            # Pydantic Settings & environment variables
-│   ├── models\
+│   ├── models/
 │   │   ├── __init__.py
 │   │   └── schemas.py           # Pydantic request & response schemas
-│   ├── services\
+│   ├── services/
 │   │   ├── __init__.py
 │   │   ├── document_loader.py   # PDF, TXT, MD text extraction
 │   │   ├── chunking.py          # Sentence-aware text chunking with overlap
@@ -88,19 +89,16 @@ D:\Filewise\
 │   │   ├── retrieval.py         # Dedicated semantic search & thresholding
 │   │   ├── llm_provider.py      # Mock, Gemini, and OpenAI providers
 │   │   └── qa_service.py        # Question-answering & evidence attribution
-│   └── static\
-│       └── index.html           # Document workspace frontend UI
-├── data\
-│   ├── sample_documents\
-│   │   ├── company_policy.md    # Fictional remote work policy
-│   │   ├── employee_handbook.pdf# Multi-page fictional handbook with PTO & benefits
-│   │   └── project_specification.txt # Fictional Project Aegis spec
-│   └── vector_store\            # Persistent FAISS index and metadata
-├── evaluation\
+│   └── static/
+│       └── index.html           # Split-screen document workspace frontend UI
+├── data/
+│   ├── sample_documents/        # Sample policy, handbook, runbook, and spec files
+│   └── vector_store/            # Vector store runtime directory
+├── evaluation/
 │   ├── questions.json           # 16 benchmark evaluation questions
 │   ├── run_evaluation.py        # Automated evaluation runner & metric calculator
 │   └── evaluation_report.json   # Generated evaluation report
-├── tests\
+├── tests/
 │   ├── test_document_loader.py  # Unit tests for file extraction
 │   ├── test_chunking.py         # Unit tests for text splitting and overlap
 │   ├── test_retrieval.py        # Unit tests for semantic retrieval & store
@@ -120,34 +118,45 @@ D:\Filewise\
 ## 5. Prerequisites & Environment Setup
 
 ### Prerequisites
-- Windows 10/11 (or Linux/macOS)
 - Python 3.11 or Python 3.12
 - Git
+- (Optional) Docker and Docker Compose
 
 ### Setup Instructions
 
-1. **Navigate to the Project Directory**:
-   ```powershell
-   cd D:\Filewise
+1. **Clone or Navigate to the Project Directory**:
+   ```bash
+   cd filewise
    ```
 
 2. **Create and Activate a Virtual Environment**:
-   ```powershell
-   py -3.12 -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+   - On Windows (PowerShell):
+     ```powershell
+     python -m venv .venv
+     .\.venv\Scripts\Activate.ps1
+     ```
+   - On Linux/macOS:
+     ```bash
+     python3 -m venv .venv
+     source .venv/bin/activate
+     ```
 
 3. **Install Dependencies**:
-   ```powershell
+   ```bash
    pip install -r requirements.txt
    ```
 
 4. **Configure Environment Variables**:
    Copy `.env.example` to `.env`:
-   ```powershell
-   Copy-Item .env.example .env
-   ```
-   *(By default, `LLM_PROVIDER=mock`, which allows running all tests, evaluation, and API queries locally without an API key).*
+   - On Windows:
+     ```powershell
+     Copy-Item .env.example .env
+     ```
+   - On Linux/macOS:
+     ```bash
+     cp .env.example .env
+     ```
+   *(By default, `LLM_PROVIDER=mock`, allowing all features, tests, and evaluations to run locally without an external API key).*
 
 ---
 
@@ -159,7 +168,7 @@ D:\Filewise\
 | `LLM_API_KEY` | *(empty)* | API key when using `gemini` or `openai`. Not required for `mock`. |
 | `LLM_MODEL_NAME` | `gemini-2.5-flash` | Target model name (e.g. `gemini-2.5-flash`, `gpt-4o-mini`). |
 | `EMBEDDING_MODEL_NAME` | `all-MiniLM-L6-v2` | Local HuggingFace embedding model name. |
-| `VECTOR_STORE_DIR` | `data/vector_store` | Path for saving persistent FAISS index and metadata. |
+| `VECTOR_STORE_DIR` | `data/vector_store` | Path for vector store files. |
 | `CHUNK_SIZE` | `500` | Target chunk size in characters. |
 | `CHUNK_OVERLAP` | `100` | Overlap between adjacent chunks in characters. |
 | `RETRIEVAL_TOP_K` | `4` | Maximum candidate chunks to retrieve. |
@@ -171,9 +180,9 @@ D:\Filewise\
 ## 7. Running the Application
 
 ### Start the Server
-Run Uvicorn from the project directory:
-```powershell
-.\.venv\Scripts\uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+Run Uvicorn from the project root:
+```bash
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 - **Interactive Workspace UI**: Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your web browser.
@@ -197,7 +206,7 @@ curl -X GET http://127.0.0.1:8000/health
   "version": "1.0.0",
   "llm_provider": "mock",
   "embedding_model": "all-MiniLM-L6-v2",
-  "indexed_documents_count": 3,
+  "indexed_documents_count": 1,
   "vector_store_ready": true
 }
 ```
@@ -234,38 +243,43 @@ curl -X GET http://127.0.0.1:8000/documents
 **Response (200 OK):**
 ```json
 {
-  "total_documents": 3,
+  "total_documents": 2,
   "documents": [
     { "filename": "company_policy.md", "chunk_count": 4, "page_count": 1 },
-    { "filename": "employee_handbook.pdf", "chunk_count": 6, "page_count": 3 },
-    { "filename": "project_specification.txt", "chunk_count": 5, "page_count": 1 }
+    { "filename": "employee_handbook.pdf", "chunk_count": 6, "page_count": 3 }
   ]
 }
 ```
 
-### 5. Ask Grounded Question
+### 5. Inspect Extracted Document Chunks
+`GET /documents/{filename}`
+```bash
+curl -X GET http://127.0.0.1:8000/documents/company_policy.md
+```
+
+### 6. Ask Question Grounded in Documents
 `POST /ask`
 
-#### Example A: Answerable Query Supported by Document Evidence
-**Request:**
+#### Example A: Document-Scoped Query
 ```json
 {
-  "question": "What is the one-time home office equipment stipend for remote employees?"
+  "question": "What is the monthly internet connectivity subsidy?",
+  "document_name": "company_policy.md"
 }
 ```
 **Response (200 OK):**
 ```json
 {
-  "question": "What is the one-time home office equipment stipend for remote employees?",
-  "answer": "Full-time remote employees receive a one-time home office equipment stipend of $1,200 upon hire to purchase ergonomic furniture, external monitors, and peripherals.",
+  "question": "What is the monthly internet connectivity subsidy?",
+  "answer": "Meridian Technologies provides a monthly internet connectivity subsidy of $75 to offset high-speed residential broadband costs.",
   "answerable": true,
   "sources": [
     {
       "document": "company_policy.md",
       "page": 1,
-      "chunk_id": "company_policy.md_001",
-      "excerpt": "Full-time remote employees receive a one-time home office equipment stipend of $1,200 upon hire to purchase ergonomic furniture, external monitors, and peripherals.",
-      "relevance_score": 0.7621
+      "chunk_id": "company_policy.md_003",
+      "excerpt": "Meridian Technologies provides a monthly internet connectivity subsidy of $75 to offset high-speed residential broadband costs.",
+      "relevance_score": 0.6997
     }
   ],
   "message": null
@@ -273,16 +287,16 @@ curl -X GET http://127.0.0.1:8000/documents
 ```
 
 #### Example B: Unanswerable Query (Explicit Abstention)
-**Request:**
 ```json
 {
-  "question": "What is the annual revenue of Meridian Technologies for 2025?"
+  "question": "What is the annual revenue of the company?",
+  "document_name": "company_policy.md"
 }
 ```
 **Response (200 OK):**
 ```json
 {
-  "question": "What is the annual revenue of Meridian Technologies for 2025?",
+  "question": "What is the annual revenue of the company?",
   "answer": "I could not find sufficient information in the uploaded documents to answer this question.",
   "answerable": false,
   "sources": [],
@@ -294,62 +308,58 @@ curl -X GET http://127.0.0.1:8000/documents
 
 ## 9. Automated Testing & Verification
 
-Filewise includes 24 automated unit and integration tests covering loaders, chunkers, retrieval, persistence, API endpoints, and error handling.
+Filewise includes 27 automated unit, integration, and failure tests.
 
 ### Run Tests
-```powershell
-.\.venv\Scripts\pytest -v
+```bash
+pytest -v
 ```
 
 ### Actual Test Execution Results
 ```text
 ============================= test session starts =============================
-platform win32 -- Python 3.12.6, pytest-9.1.1, pluggy-1.6.0 -- D:\Filewise\.venv\Scripts\python.exe
-rootdir: D:\Filewise, configfile: pytest.ini, testpaths: tests
-collected 24 items
+platform win32 -- Python 3.12.6, pytest-9.1.1, pluggy-1.6.0
+rootdir: ., configfile: pytest.ini, testpaths: tests
+collected 27 items
 
-tests/test_api.py::test_health_endpoint PASSED                           [  4%]
-tests/test_api.py::test_documents_empty_list PASSED                      [  8%]
-tests/test_api.py::test_ingest_single_document PASSED                    [ 12%]
-tests/test_api.py::test_ask_question_unanswerable_empty_store PASSED     [ 16%]
-tests/test_api.py::test_end_to_end_ingest_and_ask PASSED                 [ 20%]
-tests/test_chunking.py::test_chunker_validation PASSED                   [ 25%]
-tests/test_chunking.py::test_chunker_short_text PASSED                   [ 29%]
-tests/test_chunking.py::test_chunker_splits_and_overlap PASSED           [ 33%]
-tests/test_chunking.py::test_chunker_multiple_pages_preserves_page_numbers PASSED [ 37%]
-tests/test_document_loader.py::test_sanitize_filename PASSED             [ 41%]
-tests/test_document_loader.py::test_is_supported PASSED                  [ 45%]
-tests/test_document_loader.py::test_load_txt_valid PASSED                [ 50%]
-tests/test_document_loader.py::test_load_markdown_valid PASSED           [ 54%]
-tests/test_document_loader.py::test_load_empty_file PASSED               [ 58%]
+tests/test_api.py::test_health_endpoint PASSED                           [  3%]
+tests/test_api.py::test_documents_empty_list PASSED                      [  7%]
+tests/test_api.py::test_ingest_single_document PASSED                    [ 11%]
+tests/test_api.py::test_ask_question_unanswerable_empty_store PASSED     [ 14%]
+tests/test_api.py::test_end_to_end_ingest_and_ask PASSED                 [ 18%]
+tests/test_api.py::test_get_document_content PASSED                      [ 22%]
+tests/test_api.py::test_document_scoped_ask PASSED                       [ 25%]
+tests/test_chunking.py::test_chunker_validation PASSED                   [ 29%]
+tests/test_chunking.py::test_chunker_short_text PASSED                   [ 33%]
+tests/test_chunking.py::test_chunker_splits_and_overlap PASSED           [ 37%]
+tests/test_chunking.py::test_chunker_multiple_pages_preserves_page_numbers PASSED [ 40%]
+tests/test_document_loader.py::test_sanitize_filename PASSED             [ 44%]
+tests/test_document_loader.py::test_is_supported PASSED                  [ 48%]
+tests/test_document_loader.py::test_load_txt_valid PASSED                [ 51%]
+tests/test_document_loader.py::test_load_markdown_valid PASSED           [ 55%]
+tests/test_document_loader.py::test_load_empty_file PASSED               [ 59%]
 tests/test_document_loader.py::test_load_unsupported_format PASSED       [ 62%]
 tests/test_document_loader.py::test_load_pdf_malformed PASSED            [ 66%]
 tests/test_failures.py::test_upload_invalid_extension PASSED             [ 70%]
-tests/test_failures.py::test_upload_empty_file PASSED                    [ 75%]
-tests/test_failures.py::test_invalid_ask_body PASSED                     [ 79%]
-tests/test_failures.py::test_llm_failure_handling PASSED                 [ 83%]
-tests/test_failures.py::test_batch_ingest_partial_failures PASSED        [ 87%]
-tests/test_retrieval.py::test_empty_knowledge_base_retrieval PASSED      [ 91%]
-tests/test_retrieval.py::test_semantic_retrieval_and_filtering PASSED    [ 95%]
-tests/test_retrieval.py::test_vector_store_persistence PASSED            [100%]
+tests/test_failures.py::test_upload_empty_file PASSED                    [ 74%]
+tests/test_failures.py::test_invalid_ask_body PASSED                     [ 77%]
+tests/test_failures.py::test_llm_failure_handling PASSED                 [ 81%]
+tests/test_failures.py::test_batch_ingest_partial_failures PASSED        [ 85%]
+tests/test_retrieval.py::test_empty_knowledge_base_retrieval PASSED      [ 88%]
+tests/test_retrieval.py::test_semantic_retrieval_and_filtering PASSED    [ 92%]
+tests/test_retrieval.py::test_vector_store_persistence PASSED            [ 96%]
+tests/test_retrieval.py::test_document_scoped_retrieval PASSED           [100%]
 
-======================== 24 passed in 3.10s ========================
+======================== 27 passed in 3.41s ========================
 ```
 
 ---
 
 ## 10. Evaluation Suite & Benchmark Results
 
-The evaluation dataset (`evaluation/questions.json`) consists of 16 structured test queries across five categories:
-1. **Single-Document Retrieval**: Exact fact retrieval from a single file or page.
-2. **Multi-Document Synthesis**: Questions requiring facts synthesized across multiple distinct documents.
-3. **Plausible Unanswerable Questions**: Questions asking for missing corporate or technical facts not in the knowledge base.
-4. **Completely Irrelevant Questions**: Out-of-domain queries testing threshold rejection.
-5. **Partial / Incomplete Evidence**: Queries where one aspect is supported and another is missing.
-
-### Run Evaluation Runner
-```powershell
-.\.venv\Scripts\python evaluation/run_evaluation.py
+Run the automated evaluation runner across the benchmark questions:
+```bash
+python evaluation/run_evaluation.py
 ```
 
 ### Actual Evaluation Results
@@ -387,37 +397,34 @@ docker compose down
 ### Build and Run with Docker CLI
 ```bash
 docker build -t filewise:latest .
-docker run -p 8000:8000 -v filewise_data:/app/data/vector_store filewise:latest
+docker run -p 8000:8000 filewise:latest
 ```
-
-*(Note: Docker configuration has been fully generated and verified with standard Python 3.12 slim images. Docker daemon presence depends on whether Docker Desktop is installed on the host).*
 
 ---
 
 ## 12. Security & Reliability Safeguards
 
-- **Safe Filename Sanitization**: All incoming filenames are stripped of path traversal characters (`..`, `/`, `\`) using `re.sub(r"[^\w\-.]", "_", Path(name).name)`.
+- **Safe Filename Sanitization**: All incoming filenames are stripped of path traversal characters (`..`, `/`, `\`) using regex.
 - **Upload Size Bounds**: Uploads exceeding `MAX_UPLOAD_SIZE_MB` (default 15MB) return `413 Request Entity Too Large`.
 - **Untrusted Document Context**: Document excerpts are injected strictly as content data separated by clear section barriers and never as system prompt instructions.
 - **Fail-Safe Abstention**: If similarity scores do not meet the configured `RELEVANCE_THRESHOLD`, retrieval exits immediately without calling the LLM.
 - **Graceful Error Propagation**: Network timeouts, missing API keys, corrupted files, and LLM rate limits return clean, informative HTTP status codes (400, 413, 422, 500) rather than crashing the server.
+- **Temporary Storage**: Uploaded files and vector store entries are wiped clean on application restart to prevent stale state from persisting.
 
 ---
 
 ## 13. GitHub Publishing Instructions
 
-To initialize Git and publish this repository to your remote GitHub account:
+To publish this repository to your GitHub account:
 
-```powershell
-cd D:\Filewise
-
-# 1. Initialize Git repository
+```bash
+# 1. Initialize Git repository (if not already initialized)
 git init
 
-# 2. Add all tracked files (respecting .gitignore)
+# 2. Add all tracked files
 git add .
 
-# 3. Create initial commit
+# 3. Create commit
 git commit -m "feat: complete implementation of Filewise Evidence-Based Knowledge Assistant"
 
 # 4. Set default branch to main
