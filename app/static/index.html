@@ -502,7 +502,6 @@
         <div class="brand-title">Filewise</div>
         <div class="brand-subtitle">Evidence-Based Knowledge Assistant</div>
       </div>
-      <div id="statusBadge" class="system-badge">Connecting...</div>
     </header>
 
     <!-- Main View: Uploads, Global Document List, Global Q&A -->
@@ -616,18 +615,6 @@
     let currentWorkspaceDoc = null;
     let currentDocChunks = [];
     let indexedDocsList = [];
-
-    async function loadHealth() {
-      try {
-        const res = await fetch('/api/v1/health');
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('statusBadge').textContent = `Ready • LLM: ${data.llm_provider}`;
-        }
-      } catch (e) {
-        document.getElementById('statusBadge').textContent = 'Server Offline';
-      }
-    }
 
     async function refreshDocuments() {
       try {
@@ -972,7 +959,6 @@
     }
 
     // Initialize
-    loadHealth();
     refreshDocuments();
   </script>
 </body>
