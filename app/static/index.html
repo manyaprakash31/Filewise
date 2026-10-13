@@ -253,6 +253,60 @@
       color: var(--danger-badge);
     }
 
+    /* Q&A Thread History Item */
+    .qa-history-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.15rem;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.15s ease;
+    }
+
+    .qa-history-item:last-child {
+      margin-bottom: 0.5rem;
+    }
+
+    .qa-question-box {
+      background: var(--tag-bg);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 4px 4px 0;
+      padding: 0.6rem 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .qa-question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .qa-question-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    .qa-timestamp {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .qa-question-text {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    .qa-answer-block {
+      padding-top: 0.25rem;
+    }
+
     .sources-section {
       border-top: 1px solid var(--border-color);
       padding-top: 0.75rem;
@@ -440,6 +494,12 @@
       padding-right: 0.35rem;
     }
 
+    .answers-scroll-pane {
+      max-height: 580px;
+      overflow-y: auto;
+      padding-right: 0.35rem;
+    }
+
     .chunk-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -596,10 +656,14 @@
             <button id="wsAskBtn" class="btn" onclick="submitWorkspaceQuestion()">
               <span id="wsAskBtnText">Ask Document Assistant</span>
             </button>
+            <div id="wsErrorBanner" class="notification error" style="display: none; margin-top: 0.65rem;"></div>
           </div>
 
           <div class="card answer-panel">
-            <div class="card-title">Grounded Answer & Evidence</div>
+            <div class="card-title">
+              <span>Grounded Answer & Evidence</span>
+              <span id="wsQaCountBadge" class="system-badge" style="display: none;">0 Q&As</span>
+            </div>
             <div id="wsAnswerArea">
               <div class="empty-state">Ask a question to see answers grounded strictly in this document's text.</div>
             </div>
@@ -615,6 +679,7 @@
     let currentWorkspaceDoc = null;
     let currentDocChunks = [];
     let indexedDocsList = [];
+    let workspaceQaHistory = [];
 
     async function refreshDocuments() {
       try {
@@ -670,7 +735,8 @@
       document.getElementById('wsDocMeta').textContent = 'Loading extracted text...';
       document.getElementById('wsChunksContainer').innerHTML = '<div class="empty-state">Loading document chunks...</div>';
       document.getElementById('wsQuestionInput').value = '';
-      document.getElementById('wsAnswerArea').innerHTML = '<div class="empty-state">Ask a question to see answers grounded strictly in this document\'s text.</div>';
+      workspaceQaHistory = [];
+      renderWorkspaceHistory();
 
       // Keep dropdown aligned
       const selector = document.getElementById('wsDocSelector');
@@ -876,10 +942,28 @@
 
       const btn = document.getElementById('wsAskBtn');
       const btnText = document.getElementById('wsAskBtnText');
-      const area = document.getElementById('wsAnswerArea');
+      const errorBanner = document.getElementById('wsErrorBanner');
+      if (errorBanner) errorBanner.style.display = 'none';
+
+      // Prevent duplicate submissions and show loading state
       btn.disabled = true;
-      btnText.innerHTML = '<span class="spinner"></span> Searching...';
-      area.innerHTML = '<div class="empty-state">Retrieving evidence from this document...</div>';
+      btnText.innerHTML = '<span class="spinner"></span> Processing...';
+
+      // Add a pending item to the Q&A thread
+      const pendingEntry = {
+        id: 'qa-' + Date.now(),
+        question: q,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        loading: true,
+        data: null,
+        error: null
+      };
+      workspaceQaHistory.push(pendingEntry);
+      renderWorkspaceHistory();
+
+      // Scroll to the newest question
+      const pendingEl = document.getElementById(pendingEntry.id);
+      if (pendingEl) pendingEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
       try {
         const res = await fetch('/api/v1/ask', {
@@ -890,10 +974,24 @@
             document_name: currentWorkspaceDoc
           })
         });
-        const data = await res.json();
-        renderAnswerResponse(area, data, true);
 
-        // Highlight supporting chunks in the left chunk pane
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server returned status ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        // Update the entry with the response
+        pendingEntry.loading = false;
+        pendingEntry.data = data;
+
+        // Clear question textbox on success
+        qInput.value = '';
+
+        renderWorkspaceHistory();
+
+        // Highlight supporting chunks in the left chunk pane for this latest answer
         const supportingChunkIds = (data.sources || []).map(s => s.chunk_id).filter(Boolean);
         renderWorkspaceChunks(currentDocChunks, supportingChunkIds);
 
@@ -905,11 +1003,102 @@
           }
         }
       } catch (e) {
-        area.innerHTML = `<div class="status-badge unavailable">Network Error</div><div class="answer-text">${escapeHtml(e.message)}</div>`;
+        // Remove pending item on error and preserve user's input in the textbox
+        const idx = workspaceQaHistory.indexOf(pendingEntry);
+        if (idx !== -1) {
+          workspaceQaHistory.splice(idx, 1);
+        }
+        renderWorkspaceHistory();
+
+        // Show clear error message
+        if (errorBanner) {
+          errorBanner.textContent = `Error: ${e.message}. Your question was retained for retry.`;
+          errorBanner.style.display = 'block';
+        } else {
+          alert(`Failed to answer question: ${e.message}`);
+        }
       } finally {
         btn.disabled = false;
         btnText.textContent = 'Ask Document Assistant';
       }
+    }
+
+    function renderWorkspaceHistory() {
+      const area = document.getElementById('wsAnswerArea');
+      const countBadge = document.getElementById('wsQaCountBadge');
+      const errorBanner = document.getElementById('wsErrorBanner');
+
+      if (!workspaceQaHistory || workspaceQaHistory.length === 0) {
+        area.innerHTML = '<div class="empty-state">Ask a question to see answers grounded strictly in this document\'s text.</div>';
+        if (countBadge) countBadge.style.display = 'none';
+        if (errorBanner) errorBanner.style.display = 'none';
+        return;
+      }
+
+      const completedCount = workspaceQaHistory.filter(e => !e.loading).length;
+      if (countBadge) {
+        countBadge.style.display = 'inline-block';
+        countBadge.textContent = `${completedCount} Q&A${completedCount === 1 ? '' : 's'}`;
+      }
+
+      area.innerHTML = `<div class="answers-scroll-pane">${workspaceQaHistory.map(entry => {
+        if (entry.loading) {
+          return `
+            <div id="${escapeHtml(entry.id)}" class="qa-history-item">
+              <div class="qa-question-box">
+                <div class="qa-question-header">
+                  <span class="qa-question-label">Question</span>
+                  <span class="qa-timestamp">${escapeHtml(entry.timestamp)}</span>
+                </div>
+                <div class="qa-question-text">${escapeHtml(entry.question)}</div>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); padding: 0.5rem 0;">
+                <span class="spinner" style="border-top-color: var(--accent); border-color: rgba(31, 35, 40, 0.2); vertical-align: middle; margin-right: 0.5rem;"></span>
+                Retrieving relevant chunks and verifying evidence...
+              </div>
+            </div>
+          `;
+        }
+
+        const data = entry.data;
+        const badgeClass = data.answerable ? 'answerable' : 'unavailable';
+        const badgeText = data.answerable ? 'Grounded in Evidence' : 'Information Unavailable';
+
+        let sourcesHtml = '';
+        if (data.sources && data.sources.length > 0) {
+          sourcesHtml = `
+            <div class="sources-section">
+              <div class="sources-title">Supporting Sources & Excerpts</div>
+              ${data.sources.map(s => `
+                <div class="source-card" onclick="scrollToChunk('${escapeHtml(s.chunk_id)}')">
+                  <div class="source-header">
+                    <span>${escapeHtml(s.document)}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
+                    <span>${s.chunk_id ? '#' + escapeHtml(s.chunk_id) : ''}</span>
+                  </div>
+                  <div class="source-excerpt">"${escapeHtml(s.excerpt)}"</div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        return `
+          <div id="${escapeHtml(entry.id)}" class="qa-history-item">
+            <div class="qa-question-box">
+              <div class="qa-question-header">
+                <span class="qa-question-label">Question</span>
+                <span class="qa-timestamp">${escapeHtml(entry.timestamp)}</span>
+              </div>
+              <div class="qa-question-text">${escapeHtml(entry.question)}</div>
+            </div>
+            <div class="qa-answer-block">
+              <span class="status-badge ${badgeClass}">${badgeText}</span>
+              <div class="answer-text">${escapeHtml(data.answer)}</div>
+              ${sourcesHtml}
+            </div>
+          </div>
+        `;
+      }).join('')}</div>`;
     }
 
     function renderAnswerResponse(targetElement, data, isWorkspace = false) {
