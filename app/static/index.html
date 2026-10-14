@@ -39,7 +39,7 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
     }
 
@@ -90,7 +90,7 @@
       align-items: start;
     }
 
-    @media (max-width: 880px) {
+    @media (max-width: 992px) {
       .app-layout {
         grid-template-columns: 1fr;
       }
@@ -318,7 +318,7 @@
       padding: 2.5rem 1.5rem;
     }
 
-    /* Chronological Q&A Thread */
+    /* Reverse Chronological Q&A Thread */
     .qa-scroll-pane {
       max-height: 620px;
       overflow-y: auto;
@@ -456,16 +456,26 @@
       line-height: 1.45;
     }
 
-    /* Document Chunk Inspector View */
+    /* Document Workspace Split Grid */
     .inspector-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 0.75rem;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid var(--border-color);
       gap: 0.75rem;
       flex-wrap: wrap;
+    }
+
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .inspector-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .chunks-scroll-pane {
@@ -615,13 +625,13 @@
           </div>
         </div>
 
-        <!-- Pane B: Document Chunks Inspector (Activated via 'Inspect Chunks') -->
+        <!-- Pane B: Single-Document Workspace (Extracted Chunks & Document-Scoped Q&A) -->
         <div id="inspectorPane" style="display: none;">
-          <div class="card">
+          <div class="card" style="padding: 0.85rem 1.25rem; margin-bottom: 1rem;">
             <div class="inspector-toolbar">
               <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <button class="btn-secondary" onclick="showQaPane()">
-                  ← Back to Q&A
+                  ← Back to All Documents Q&A
                 </button>
                 <strong id="inspectDocFilename" style="font-size: 0.95rem;">document.pdf</strong>
               </div>
@@ -629,9 +639,42 @@
                 <span id="inspectDocMeta" class="doc-meta">0 chunks</span>
               </div>
             </div>
+          </div>
 
-            <div id="inspectChunksContainer" class="chunks-scroll-pane">
-              <div class="empty-state">Loading document chunks...</div>
+          <div class="inspector-grid">
+            <!-- Left Side: Extracted Document Chunks -->
+            <div class="card">
+              <div class="card-title">
+                <span>Extracted Document Chunks</span>
+                <span id="inspectChunkBadge" class="system-badge">0 Chunks</span>
+              </div>
+              <div id="inspectChunksContainer" class="chunks-scroll-pane">
+                <div class="empty-state">Loading document chunks...</div>
+              </div>
+            </div>
+
+            <!-- Right Side: Document-Specific Q&A with Reverse Chronological Ordering -->
+            <div>
+              <div class="card">
+                <div class="card-title">
+                  <span>Ask About This Document</span>
+                </div>
+                <textarea id="docQuestionInput" class="textarea-query" placeholder="Ask a question grounded specifically in this document..."></textarea>
+                <button id="docAskBtn" class="btn" onclick="submitDocQuestion()">
+                  <span id="docAskBtnText">Ask Document Assistant</span>
+                </button>
+                <div id="docQaErrorBanner" class="notification error" style="display: none;"></div>
+              </div>
+
+              <div class="card">
+                <div class="card-title">
+                  <span>Grounded Answer & Evidence</span>
+                  <span id="docQaCountBadge" class="system-badge" style="display: none;">0 Q&As</span>
+                </div>
+                <div id="docQaThreadContainer">
+                  <div class="empty-state">Ask a question to see evidence-grounded answers from this document.</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -643,9 +686,18 @@
     // Frontend Session State
     let selectedFiles = [];
     let indexedDocs = [];
-    let qaHistory = [];
+    let qaHistory = []; // Multi-document Q&A history (newest at index 0)
+    let docQaHistories = {}; // Document-scoped Q&A histories mapped by filename (newest at index 0)
     let currentlyInspectedDoc = null;
     let currentlyInspectedChunks = [];
+
+    // Helper to get or initialize doc-scoped history
+    function getDocHistory(filename) {
+      if (!docQaHistories[filename]) {
+        docQaHistories[filename] = [];
+      }
+      return docQaHistories[filename];
+    }
 
     // Session initialization: reset temporary server state on page load or refresh
     window.addEventListener('DOMContentLoaded', async () => {
@@ -663,6 +715,7 @@
       selectedFiles = [];
       indexedDocs = [];
       qaHistory = [];
+      docQaHistories = {};
       currentlyInspectedDoc = null;
       currentlyInspectedChunks = [];
 
@@ -672,9 +725,12 @@
       document.getElementById('uploadNotification').className = 'notification';
       document.getElementById('uploadNotification').style.display = 'none';
       document.getElementById('questionInput').value = '';
+      const docQInput = document.getElementById('docQuestionInput');
+      if (docQInput) docQInput.value = '';
 
       renderDocList();
       renderQaHistory();
+      renderDocQaHistory();
       showQaPane();
     }
 
@@ -792,6 +848,7 @@
       }
     }
 
+    // --- REVERSE CHRONOLOGICAL MULTI-DOCUMENT Q&A ---
     async function submitQuestion() {
       const qInput = document.getElementById('questionInput');
       const q = qInput.value.trim();
@@ -809,7 +866,7 @@
       btn.disabled = true;
       btnText.innerHTML = '<span class="spinner"></span> Searching...';
 
-      // Append pending entry to thread
+      // Reverse Chronological: Prepend pending entry to top of thread (index 0)
       const pendingEntry = {
         id: 'qa-' + Date.now(),
         question: q,
@@ -817,12 +874,13 @@
         loading: true,
         data: null,
       };
-      qaHistory.push(pendingEntry);
+      qaHistory.unshift(pendingEntry);
       renderQaHistory();
 
-      // Scroll to newly added item
-      const pendingEl = document.getElementById(pendingEntry.id);
-      if (pendingEl) pendingEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // Scroll container to top so user sees the newly submitted question
+      const container = document.getElementById('qaThreadContainer');
+      const scrollPane = container.querySelector('.qa-scroll-pane');
+      if (scrollPane) scrollPane.scrollTop = 0;
 
       try {
         const res = await fetch('/api/v1/ask', {
@@ -838,7 +896,7 @@
 
         const data = await res.json();
 
-        // Update pending entry with fresh response
+        // Update pending entry at the top with fresh response
         pendingEntry.loading = false;
         pendingEntry.data = data;
 
@@ -846,6 +904,7 @@
         qInput.value = '';
 
         renderQaHistory();
+        if (scrollPane) scrollPane.scrollTop = 0;
       } catch (err) {
         // On error: remove the pending entry and preserve input for retry
         const idx = qaHistory.indexOf(pendingEntry);
@@ -876,47 +935,121 @@
       countBadge.style.display = 'inline-block';
       countBadge.textContent = `${completedCount} Q&A${completedCount === 1 ? '' : 's'}`;
 
-      container.innerHTML = `<div class="qa-scroll-pane">${qaHistory.map(entry => {
-        if (entry.loading) {
-          return `
-            <div id="${escapeHtml(entry.id)}" class="qa-history-item">
-              <div class="qa-question-box">
-                <div class="qa-question-header">
-                  <span class="qa-question-label">Question</span>
-                  <span class="qa-timestamp">${escapeHtml(entry.timestamp)}</span>
-                </div>
-                <div class="qa-question-text">${escapeHtml(entry.question)}</div>
-              </div>
-              <div style="font-size: 0.85rem; color: var(--text-muted); padding: 0.5rem 0;">
-                <span class="spinner" style="border-top-color: var(--accent); border-color: rgba(31, 35, 40, 0.2); vertical-align: middle; margin-right: 0.4rem;"></span>
-                Retrieving relevant chunks across documents and verifying evidence...
-              </div>
-            </div>
-          `;
+      // Entries are in reverse chronological order: index 0 (newest) rendered first at the top
+      container.innerHTML = `<div class="qa-scroll-pane">${qaHistory.map(entry => renderQaCard(entry, false)).join('')}</div>`;
+    }
+
+    // --- REVERSE CHRONOLOGICAL SINGLE-DOCUMENT Q&A ---
+    async function submitDocQuestion() {
+      const qInput = document.getElementById('docQuestionInput');
+      const q = qInput.value.trim();
+      if (!q || !currentlyInspectedDoc) return;
+
+      const btn = document.getElementById('docAskBtn');
+      const btnText = document.getElementById('docAskBtnText');
+      const errorBanner = document.getElementById('docQaErrorBanner');
+      errorBanner.style.display = 'none';
+
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Searching...';
+
+      const docHistory = getDocHistory(currentlyInspectedDoc);
+
+      // Reverse Chronological: Prepend pending entry to top of thread (index 0)
+      const pendingEntry = {
+        id: 'doc-qa-' + Date.now(),
+        question: q,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        loading: true,
+        data: null,
+      };
+      docHistory.unshift(pendingEntry);
+      renderDocQaHistory();
+
+      const container = document.getElementById('docQaThreadContainer');
+      const scrollPane = container.querySelector('.qa-scroll-pane');
+      if (scrollPane) scrollPane.scrollTop = 0;
+
+      try {
+        const res = await fetch('/api/v1/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: q,
+            document_name: currentlyInspectedDoc
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server error (${res.status})`);
         }
 
-        const data = entry.data;
-        const badgeClass = data.answerable ? 'answerable' : 'unavailable';
-        const badgeText = data.answerable ? 'Grounded in Evidence' : 'Information Unavailable';
+        const data = await res.json();
 
-        let sourcesHtml = '';
-        if (data.sources && data.sources.length > 0) {
-          sourcesHtml = `
-            <div class="sources-section">
-              <div class="sources-title">Supporting Sources & Excerpts</div>
-              ${data.sources.map(s => `
-                <div class="source-card" onclick="inspectDocument('${encodeURIComponent(s.document)}', '${escapeHtml(s.chunk_id || '')}')" title="Click to inspect chunk in document">
-                  <div class="source-header">
-                    <span class="source-header-doc">${escapeHtml(s.document)}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
-                    <span>${s.chunk_id ? '#' + escapeHtml(s.chunk_id) : ''}</span>
-                  </div>
-                  <div class="source-excerpt">"${escapeHtml(s.excerpt)}"</div>
-                </div>
-              `).join('')}
-            </div>
-          `;
+        // Update pending entry at the top with fresh response
+        pendingEntry.loading = false;
+        pendingEntry.data = data;
+
+        // Auto-clear question input on success so next question can be typed immediately
+        qInput.value = '';
+
+        renderDocQaHistory();
+        if (scrollPane) scrollPane.scrollTop = 0;
+
+        // Highlight supporting chunks in the left chunk pane
+        const supportingChunkIds = (data.sources || []).map(s => s.chunk_id).filter(Boolean);
+        renderInspectorChunks(currentlyInspectedChunks, supportingChunkIds);
+
+        // Scroll to first supporting chunk
+        if (supportingChunkIds.length > 0) {
+          scrollToChunk(supportingChunkIds[0]);
         }
+      } catch (err) {
+        const idx = docHistory.indexOf(pendingEntry);
+        if (idx !== -1) {
+          docHistory.splice(idx, 1);
+        }
+        renderDocQaHistory();
 
+        errorBanner.textContent = `Error: ${err.message}. Your question was retained for retry.`;
+        errorBanner.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Ask Document Assistant';
+      }
+    }
+
+    function renderDocQaHistory() {
+      const container = document.getElementById('docQaThreadContainer');
+      const countBadge = document.getElementById('docQaCountBadge');
+      if (!currentlyInspectedDoc) {
+        container.innerHTML = '<div class="empty-state">Select a document to inspect and ask questions.</div>';
+        if (countBadge) countBadge.style.display = 'none';
+        return;
+      }
+
+      const docHistory = getDocHistory(currentlyInspectedDoc);
+
+      if (!docHistory || docHistory.length === 0) {
+        container.innerHTML = '<div class="empty-state">Ask a question to see evidence-grounded answers from this document.</div>';
+        if (countBadge) countBadge.style.display = 'none';
+        return;
+      }
+
+      const completedCount = docHistory.filter(e => !e.loading).length;
+      if (countBadge) {
+        countBadge.style.display = 'inline-block';
+        countBadge.textContent = `${completedCount} Q&A${completedCount === 1 ? '' : 's'}`;
+      }
+
+      // Entries are in reverse chronological order: index 0 (newest) rendered first at the top
+      container.innerHTML = `<div class="qa-scroll-pane">${docHistory.map(entry => renderQaCard(entry, true)).join('')}</div>`;
+    }
+
+    // Common card renderer for both multi-document and single-document Q&A
+    function renderQaCard(entry, isDocWorkspace = false) {
+      if (entry.loading) {
         return `
           <div id="${escapeHtml(entry.id)}" class="qa-history-item">
             <div class="qa-question-box">
@@ -926,14 +1059,57 @@
               </div>
               <div class="qa-question-text">${escapeHtml(entry.question)}</div>
             </div>
-            <div class="qa-answer-block">
-              <span class="status-badge ${badgeClass}">${badgeText}</span>
-              <div class="answer-text">${escapeHtml(data.answer)}</div>
-              ${sourcesHtml}
+            <div style="font-size: 0.85rem; color: var(--text-muted); padding: 0.5rem 0;">
+              <span class="spinner" style="border-top-color: var(--accent); border-color: rgba(31, 35, 40, 0.2); vertical-align: middle; margin-right: 0.4rem;"></span>
+              ${isDocWorkspace ? 'Retrieving evidence from this document...' : 'Retrieving relevant chunks across documents and verifying evidence...'}
             </div>
           </div>
         `;
-      }).join('')}</div>`;
+      }
+
+      const data = entry.data;
+      const badgeClass = data.answerable ? 'answerable' : 'unavailable';
+      const badgeText = data.answerable ? 'Grounded in Evidence' : 'Information Unavailable';
+
+      let sourcesHtml = '';
+      if (data.sources && data.sources.length > 0) {
+        sourcesHtml = `
+          <div class="sources-section">
+            <div class="sources-title">Supporting Sources & Excerpts</div>
+            ${data.sources.map(s => {
+              const clickAction = isDocWorkspace
+                ? `scrollToChunk('${escapeHtml(s.chunk_id || '')}')`
+                : `inspectDocument('${encodeURIComponent(s.document)}', '${escapeHtml(s.chunk_id || '')}')`;
+              return `
+                <div class="source-card" onclick="${clickAction}" title="Click to view supporting chunk">
+                  <div class="source-header">
+                    <span class="source-header-doc">${escapeHtml(s.document)}${s.page ? ' (Page ' + s.page + ')' : ''}</span>
+                    <span>${s.chunk_id ? '#' + escapeHtml(s.chunk_id) : ''}</span>
+                  </div>
+                  <div class="source-excerpt">"${escapeHtml(s.excerpt)}"</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      return `
+        <div id="${escapeHtml(entry.id)}" class="qa-history-item">
+          <div class="qa-question-box">
+            <div class="qa-question-header">
+              <span class="qa-question-label">Question</span>
+              <span class="qa-timestamp">${escapeHtml(entry.timestamp)}</span>
+            </div>
+            <div class="qa-question-text">${escapeHtml(entry.question)}</div>
+          </div>
+          <div class="qa-answer-block">
+            <span class="status-badge ${badgeClass}">${badgeText}</span>
+            <div class="answer-text">${escapeHtml(data.answer)}</div>
+            ${sourcesHtml}
+          </div>
+        </div>
+      `;
     }
 
     async function inspectDocument(encodedFilename, highlightChunkId = null) {
@@ -949,6 +1125,9 @@
       const container = document.getElementById('inspectChunksContainer');
       container.innerHTML = '<div class="empty-state">Loading document chunks...</div>';
 
+      // Render document Q&A history for this document
+      renderDocQaHistory();
+
       try {
         const res = await fetch(`/api/v1/documents/${encodeURIComponent(filename)}`);
         if (!res.ok) {
@@ -959,15 +1138,13 @@
         const data = await res.json();
         currentlyInspectedChunks = data.chunks || [];
         document.getElementById('inspectDocMeta').textContent = `${data.chunk_count} chunk(s)${data.page_count ? ' • ' + data.page_count + ' page(s)' : ''}`;
+        document.getElementById('inspectChunkBadge').textContent = `${data.chunk_count} Chunk(s)`;
 
         renderInspectorChunks(currentlyInspectedChunks, highlightChunkId ? [highlightChunkId] : []);
 
         if (highlightChunkId) {
           setTimeout(() => {
-            const target = document.getElementById(`chunk-card-${highlightChunkId}`);
-            if (target) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            scrollToChunk(highlightChunkId);
           }, 100);
         }
       } catch (err) {
@@ -1000,6 +1177,14 @@
           </div>
         `;
       }).join('');
+    }
+
+    function scrollToChunk(chunkId) {
+      if (!chunkId) return;
+      const target = document.getElementById(`chunk-card-${chunkId}`);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
     function showQaPane() {
