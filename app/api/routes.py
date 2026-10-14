@@ -236,6 +236,19 @@ async def list_documents(request: Request) -> DocumentListResponse:
     return DocumentListResponse(total_documents=len(docs), documents=docs)
 
 
+@router.post("/session/reset", summary="Reset Temporary Session")
+@router.delete("/documents", summary="Clear All Indexed Documents")
+async def reset_session(request: Request):
+    """Clear all uploaded documents, chunks, and embeddings for a clean temporary session."""
+    vector_store = request.app.state.vector_store
+    vector_store.clear()
+    return {
+        "status": "cleared",
+        "message": "Temporary session data, documents, and vector store cleared successfully.",
+    }
+
+
+
 @router.get(
     "/documents/{filename}",
     response_model=DocumentContentResponse,

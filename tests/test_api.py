@@ -141,3 +141,50 @@ def test_document_scoped_ask(client):
     # Citations must come strictly from doc_primary.txt
     for s in data["sources"]:
         assert s["document"] == "doc_primary.txt"
+
+
+def test_session_reset(client):
+    # Ingest a document
+    doc = b"Temporary document content for testing reset."
+    client.post("/documents/ingest", files={"file": ("temp.txt", io.BytesIO(doc), "text/plain")})
+
+    # Verify document exists
+    res_docs = client.get("/documents")
+    assert res_docs.json()["total_documents"] == 1
+
+    # Reset session via POST
+    res_reset = client.post("/session/reset")
+    assert res_reset.status_code == 200
+    assert res_reset.json()["status"] == "cleared"
+
+    # Verify document list is now empty
+    res_empty = client.get("/documents")
+    assert res_empty.json()["total_documents"] == 0
+
+    # Test DELETE /documents as well
+    client.post("/documents/ingest", files={"file": ("temp2.txt", io.BytesIO(doc), "text/plain")})
+    res_del = client.delete("/documents")
+    assert res_del.status_code == 200
+    assert client.get("/documents").json()["total_documents"] == 0
+
+
+def test_multi_document_ask_without_scope(client):
+    # Ingest two distinct documents
+    doc1 = b"The disaster recovery RTO objective is 4 hours."
+    doc2 = b"The security encryption standard is AES-256."
+    client.post("/documents/ingest", files={"file": ("dr.txt", io.BytesIO(doc1), "text/plain")})
+    client.post("/documents/ingest", files={"file": ("sec.txt", io.BytesIO(doc2), "text/plain")})
+
+    # Ask question spanning documents without specifying document_name
+    res_dr = client.post("/ask", json={"question": "What is the disaster recovery RTO objective?"})
+    assert res_dr.status_code == 200
+    data_dr = res_dr.json()
+    assert data_dr["answerable"] is True
+    assert any(s["document"] == "dr.txt" for s in data_dr["sources"])
+
+    res_sec = client.post("/ask", json={"question": "What is the security encryption standard?"})
+    assert res_sec.status_code == 200
+    data_sec = res_sec.json()
+    assert data_sec["answerable"] is True
+    assert any(s["document"] == "sec.txt" for s in data_sec["sources"])
+

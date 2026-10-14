@@ -17,7 +17,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 36.18,
+      "latency_ms": 19.05,
       "expected_sources": [
         "company_policy.md"
       ],
@@ -36,7 +36,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 33.79,
+      "latency_ms": 20.76,
       "expected_sources": [
         "company_policy.md"
       ],
@@ -56,7 +56,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 36.1,
+      "latency_ms": 19.87,
       "expected_sources": [
         "project_specification.txt"
       ],
@@ -75,12 +75,13 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 37.69,
+      "latency_ms": 18.95,
       "expected_sources": [
         "project_specification.txt"
       ],
       "actual_sources": [
         "project_specification.txt",
+        "disaster_recovery_runbook.md",
         "project_specification.txt"
       ],
       "source_covered": true,
@@ -94,7 +95,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 33.9,
+      "latency_ms": 21.0,
       "expected_sources": [
         "employee_handbook.pdf"
       ],
@@ -114,7 +115,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 32.39,
+      "latency_ms": 15.62,
       "expected_sources": [
         "employee_handbook.pdf"
       ],
@@ -133,7 +134,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 34.35,
+      "latency_ms": 17.65,
       "expected_sources": [
         "company_policy.md",
         "employee_handbook.pdf"
@@ -153,7 +154,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 32.92,
+      "latency_ms": 21.72,
       "expected_sources": [
         "company_policy.md",
         "project_specification.txt"
@@ -173,7 +174,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 39.51,
+      "latency_ms": 18.56,
       "expected_sources": [
         "company_policy.md",
         "employee_handbook.pdf"
@@ -193,7 +194,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 37.79,
+      "latency_ms": 19.13,
       "expected_sources": [
         "project_specification.txt",
         "employee_handbook.pdf"
@@ -201,7 +202,8 @@
       "actual_sources": [
         "project_specification.txt",
         "employee_handbook.pdf",
-        "project_specification.txt"
+        "project_specification.txt",
+        "security_whitepaper.pdf"
       ],
       "source_covered": true,
       "keyword_hit": true,
@@ -214,7 +216,7 @@
       "expected_answerable": false,
       "actual_answerable": false,
       "status": "PASS (Correctly Abstained)",
-      "latency_ms": 34.26,
+      "latency_ms": 17.04,
       "expected_sources": [],
       "actual_sources": [],
       "source_covered": true,
@@ -228,7 +230,7 @@
       "expected_answerable": false,
       "actual_answerable": false,
       "status": "PASS (Correctly Abstained)",
-      "latency_ms": 31.29,
+      "latency_ms": 17.42,
       "expected_sources": [],
       "actual_sources": [],
       "source_covered": true,
@@ -242,7 +244,7 @@
       "expected_answerable": false,
       "actual_answerable": false,
       "status": "PASS (Correctly Abstained)",
-      "latency_ms": 32.02,
+      "latency_ms": 15.67,
       "expected_sources": [],
       "actual_sources": [],
       "source_covered": true,
@@ -256,7 +258,7 @@
       "expected_answerable": false,
       "actual_answerable": false,
       "status": "PASS (Correctly Abstained)",
-      "latency_ms": 26.55,
+      "latency_ms": 20.57,
       "expected_sources": [],
       "actual_sources": [],
       "source_covered": true,
@@ -270,7 +272,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 26.82,
+      "latency_ms": 17.98,
       "expected_sources": [
         "employee_handbook.pdf"
       ],
@@ -288,7 +290,7 @@
       "expected_answerable": true,
       "actual_answerable": true,
       "status": "PASS (Answered)",
-      "latency_ms": 24.23,
+      "latency_ms": 22.89,
       "expected_sources": [
         "employee_handbook.pdf"
       ],

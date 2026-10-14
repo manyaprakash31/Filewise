@@ -1,0 +1,26 @@
+PRODUCT FEATURE RELEASE SPECIFICATION: ADVANCED REASONING AGENT
+Version: 2.4-GA
+Target Release Date: December 10, 2026
+Lead Product Manager: Sarah Jenkins
+Engineering Lead: Dr. Aris Thorne
+
+1. FEATURE OVERVIEW
+The Advanced Reasoning Agent is an autonomous pipeline extension for Filewise designed to perform multi-hop factual synthesis across complex document graphs. It incorporates verifiable citation checking, mathematical verification, and cross-reference validation.
+
+2. API SPECIFICATIONS AND RATE LIMITS
+- Ingestion Endpoint: POST /v2/agent/analyze
+- Default Query Timeout: 15,000 milliseconds (15 seconds)
+- Maximum Context Window: 128,000 tokens per session
+- Rate Limits:
+  * Free Tier: 60 requests per hour
+  * Pro Tier: 600 requests per hour
+  * Enterprise Dedicated: Unlimited with up to 100 concurrent worker streams
+
+3. PRICING AND BILLING TIERS
+The Advanced Reasoning Agent billing structure is modeled on processed evidence volume:
+- Pro Subscription: $49/month including 10,000 queries. Additional query packs cost $10 per 2,500 queries.
+- Enterprise Tier: Custom annual contract starting at $18,000/year, including dedicated vector hardware instances and 99.99% uptime SLA guarantee.
+- Educational and Open Source Grant: 50% discount available upon verification of academic credentials.
+
+4. SYSTEM DEPENDENCIES & PREREQUISITES
+The reasoning engine requires Python 3.12+ runtime, CUDA 12.4 compatible GPU drivers for local acceleration, and minimum 16 GB unified system memory.

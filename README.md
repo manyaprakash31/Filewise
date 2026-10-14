@@ -257,10 +257,30 @@ curl -X GET http://127.0.0.1:8000/documents
 curl -X GET http://127.0.0.1:8000/documents/company_policy.md
 ```
 
-### 6. Ask Question Grounded in Documents
+### 6. Reset Temporary Session Data
+`POST /session/reset` or `DELETE /documents`
+```bash
+curl -X POST http://127.0.0.1:8000/session/reset
+```
+**Response (200 OK):**
+```json
+{
+  "status": "cleared",
+  "message": "Temporary session data, documents, and vector store cleared successfully."
+}
+```
+
+### 7. Ask Question Grounded in Documents
 `POST /ask`
 
-#### Example A: Document-Scoped Query
+#### Example A: Multi-Document Query (Default)
+```json
+{
+  "question": "What is the one-time home office equipment stipend for remote employees?"
+}
+```
+
+#### Example B: Document-Scoped Query
 ```json
 {
   "question": "What is the monthly internet connectivity subsidy?",
@@ -308,7 +328,7 @@ curl -X GET http://127.0.0.1:8000/documents/company_policy.md
 
 ## 9. Automated Testing & Verification
 
-Filewise includes 27 automated unit, integration, and failure tests.
+Filewise includes 29 automated unit, integration, and failure tests.
 
 ### Run Tests
 ```bash
@@ -320,37 +340,39 @@ pytest -v
 ============================= test session starts =============================
 platform win32 -- Python 3.12.6, pytest-9.1.1, pluggy-1.6.0
 rootdir: ., configfile: pytest.ini, testpaths: tests
-collected 27 items
+collected 29 items
 
 tests/test_api.py::test_health_endpoint PASSED                           [  3%]
-tests/test_api.py::test_documents_empty_list PASSED                      [  7%]
-tests/test_api.py::test_ingest_single_document PASSED                    [ 11%]
-tests/test_api.py::test_ask_question_unanswerable_empty_store PASSED     [ 14%]
-tests/test_api.py::test_end_to_end_ingest_and_ask PASSED                 [ 18%]
-tests/test_api.py::test_get_document_content PASSED                      [ 22%]
-tests/test_api.py::test_document_scoped_ask PASSED                       [ 25%]
-tests/test_chunking.py::test_chunker_validation PASSED                   [ 29%]
-tests/test_chunking.py::test_chunker_short_text PASSED                   [ 33%]
-tests/test_chunking.py::test_chunker_splits_and_overlap PASSED           [ 37%]
-tests/test_chunking.py::test_chunker_multiple_pages_preserves_page_numbers PASSED [ 40%]
-tests/test_document_loader.py::test_sanitize_filename PASSED             [ 44%]
-tests/test_document_loader.py::test_is_supported PASSED                  [ 48%]
-tests/test_document_loader.py::test_load_txt_valid PASSED                [ 51%]
-tests/test_document_loader.py::test_load_markdown_valid PASSED           [ 55%]
-tests/test_document_loader.py::test_load_empty_file PASSED               [ 59%]
-tests/test_document_loader.py::test_load_unsupported_format PASSED       [ 62%]
-tests/test_document_loader.py::test_load_pdf_malformed PASSED            [ 66%]
-tests/test_failures.py::test_upload_invalid_extension PASSED             [ 70%]
-tests/test_failures.py::test_upload_empty_file PASSED                    [ 74%]
-tests/test_failures.py::test_invalid_ask_body PASSED                     [ 77%]
-tests/test_failures.py::test_llm_failure_handling PASSED                 [ 81%]
-tests/test_failures.py::test_batch_ingest_partial_failures PASSED        [ 85%]
-tests/test_retrieval.py::test_empty_knowledge_base_retrieval PASSED      [ 88%]
-tests/test_retrieval.py::test_semantic_retrieval_and_filtering PASSED    [ 92%]
+tests/test_api.py::test_documents_empty_list PASSED                      [  6%]
+tests/test_api.py::test_ingest_single_document PASSED                    [ 10%]
+tests/test_api.py::test_ask_question_unanswerable_empty_store PASSED     [ 13%]
+tests/test_api.py::test_end_to_end_ingest_and_ask PASSED                 [ 17%]
+tests/test_api.py::test_get_document_content PASSED                      [ 20%]
+tests/test_api.py::test_document_scoped_ask PASSED                       [ 24%]
+tests/test_api.py::test_session_reset PASSED                             [ 27%]
+tests/test_api.py::test_multi_document_ask_without_scope PASSED          [ 31%]
+tests/test_chunking.py::test_chunker_validation PASSED                   [ 34%]
+tests/test_chunking.py::test_chunker_short_text PASSED                   [ 37%]
+tests/test_chunking.py::test_chunker_splits_and_overlap PASSED           [ 41%]
+tests/test_chunking.py::test_chunker_multiple_pages_preserves_page_numbers PASSED [ 44%]
+tests/test_document_loader.py::test_sanitize_filename PASSED             [ 48%]
+tests/test_document_loader.py::test_is_supported PASSED                  [ 51%]
+tests/test_document_loader.py::test_load_txt_valid PASSED                [ 55%]
+tests/test_document_loader.py::test_load_markdown_valid PASSED           [ 58%]
+tests/test_document_loader.py::test_load_empty_file PASSED               [ 62%]
+tests/test_document_loader.py::test_load_unsupported_format PASSED       [ 65%]
+tests/test_document_loader.py::test_load_pdf_malformed PASSED            [ 68%]
+tests/test_failures.py::test_upload_invalid_extension PASSED             [ 72%]
+tests/test_failures.py::test_upload_empty_file PASSED                    [ 75%]
+tests/test_failures.py::test_invalid_ask_body PASSED                     [ 79%]
+tests/test_failures.py::test_llm_failure_handling PASSED                 [ 82%]
+tests/test_failures.py::test_batch_ingest_partial_failures PASSED        [ 86%]
+tests/test_retrieval.py::test_empty_knowledge_base_retrieval PASSED      [ 89%]
+tests/test_retrieval.py::test_semantic_retrieval_and_filtering PASSED    [ 93%]
 tests/test_retrieval.py::test_vector_store_persistence PASSED            [ 96%]
 tests/test_retrieval.py::test_document_scoped_retrieval PASSED           [100%]
 
-======================== 27 passed in 3.41s ========================
+======================== 29 passed in 3.26s ========================
 ```
 
 ---

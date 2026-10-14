@@ -1,7 +1,7 @@
 """Text chunking service with configurable chunk size and overlap."""
 
 import re
-from typing import List, Optional
+from typing import List
 from app.models.schemas import DocumentChunk
 from app.services.document_loader import DocumentPage
 
